@@ -1,0 +1,5 @@
+packages:
+  - 'pinia'
+  - 'vue'
+  - 'vue-router'
+  - 'vuex'
