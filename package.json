@@ -6,7 +6,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsdown",
+    "dev:pinia": "pnpm --filter play dev",
+    "build:pinia": "pnpm --filter play build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "commitlint": "commitlint --edit",
@@ -27,11 +28,15 @@
     "lint-staged": "^16.1.2",
     "prettier": "^3.6.2",
     "tsdown": "^0.12.9",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vite": "^7.0.5"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,vue}": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "vue": "^3.5.17"
   }
 }
