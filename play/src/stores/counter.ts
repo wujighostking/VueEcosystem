@@ -4,7 +4,7 @@ const useCounterStore = defineStore('counter', {
   state: () => {
     return { count: 0 }
   },
-  getter: {
+  getters: {
     double() {
       return this.count * 2
     },

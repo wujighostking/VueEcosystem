@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@vue/shared':
+        specifier: ^3.5.17
+        version: 3.5.17
       vue:
         specifier: ^3.5.17
         version: 3.5.17(typescript@5.8.3)
@@ -56,9 +59,6 @@ importers:
       pinia:
         specifier: workspace:*
         version: link:../pinia
-      vue:
-        specifier: ^3.5.17
-        version: 3.5.17(typescript@5.8.3)
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.0

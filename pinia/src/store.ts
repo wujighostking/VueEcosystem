@@ -1,19 +1,31 @@
-import type { EffectScope } from 'vue'
+import type { ComputedRef, EffectScope } from 'vue'
 import type { PiniaType } from './createPinia'
-import { isString } from '@vue/shared'
-import { effectScope, getCurrentInstance, inject, reactive } from 'vue'
+import { isFunction, isString } from '@vue/shared'
+import { computed, effectScope, getCurrentInstance, inject, reactive } from 'vue'
 
 import { piniaSymbol } from './rootStore'
 
 function createOptionStore(id: string, options: any, pinia: PiniaType) {
-  const { state } = options
+  const { state, getters, actions } = options
   const store = reactive({})
   let scope: EffectScope
+
+  function wrapAction(action: (...args: any[]) => any) {
+    return function (...args: any[]) {
+      const result = action.call(store, ...args)
+
+      return result
+    }
+  }
 
   function setup() {
     const localStore = pinia.state!.value[id] = state?.() ?? {}
 
-    return localStore
+    return Object.assign(localStore, actions, Object.keys(getters).reduce<Record<string, ComputedRef>>((getter, getterName) => {
+      getter[getterName] = computed(() => getters[getterName].call(store))
+
+      return getter
+    }, {}))
   }
 
   const setupStore = pinia._e.run(() => {
@@ -21,8 +33,15 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
     return scope.run(() => setup())
   })
 
-  Object.assign(store, setupStore)
+  for (const key in actions) {
+    const fn = actions[key]
 
+    if (isFunction(fn)) {
+      setupStore[key] = wrapAction(fn)
+    }
+  }
+
+  Object.assign(store, setupStore)
   pinia._s.set(id, store)
 }
 

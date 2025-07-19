@@ -6,7 +6,13 @@ const store = useCounterStore()
 
 <template>
   <div>
-    <button>{{ store.count }}</button>
+    <button @click="store.increment">
+      +
+    </button>
+    count: {{ store.count }} -- double: {{ store.double }}
+    <button @click="store.decrement">
+      -
+    </button>
   </div>
 </template>
 
