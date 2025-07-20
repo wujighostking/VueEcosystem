@@ -6,7 +6,31 @@ import { computed, effectScope, getCurrentInstance, inject, reactive } from 'vue
 import { piniaSymbol } from './rootStore'
 
 function createOptionStore(id: string, options: any, pinia: PiniaType) {
-  const { state, getters, actions } = options
+  const { state, getters = {}, actions = {} } = options
+  function handleGettersToComputed() {
+    return Object.keys(getters).reduce<Record<string, ComputedRef>>((getter, getterName) => {
+      getter[getterName] = computed(() => {
+        const store = pinia._s.get(id)
+        getters[getterName].call(store)
+      })
+
+      return getter
+    }, {})
+  }
+
+  function setup() {
+    const localStore = pinia.state!.value[id] = state?.() ?? {}
+
+    const getters = handleGettersToComputed()
+
+    return Object.assign(localStore, actions, getters)
+  }
+
+  createSetupStore(id, setup, pinia)
+}
+
+function createSetupStore(id: string, setup: () => Record<string, any>, pinia: PiniaType) {
+  const { actions = {} } = setup as any
   const store = reactive({})
   let scope: EffectScope
 
@@ -18,16 +42,6 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
     }
   }
 
-  function setup() {
-    const localStore = pinia.state!.value[id] = state?.() ?? {}
-
-    return Object.assign(localStore, actions, Object.keys(getters).reduce<Record<string, ComputedRef>>((getter, getterName) => {
-      getter[getterName] = computed(() => getters[getterName].call(store))
-
-      return getter
-    }, {}))
-  }
-
   const setupStore = pinia._e.run(() => {
     scope = effectScope()
     return scope.run(() => setup())
@@ -36,7 +50,7 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
   for (const key in actions) {
     const fn = actions[key]
 
-    if (isFunction(fn)) {
+    if (isFunction(fn) && setupStore) {
       setupStore[key] = wrapAction(fn)
     }
   }
@@ -45,9 +59,10 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
   pinia._s.set(id, store)
 }
 
-export function defineStore(idOptions: string | ({ id: string }), setup: object | (() => object)) {
+export function defineStore(idOptions: string | ({ id: string }), setup: object | (() => Record<string, any>)) {
   let id: string
   let options: any
+  const isSetupStore = isFunction(setup)
 
   if (isString(idOptions)) {
     id = idOptions
@@ -64,7 +79,12 @@ export function defineStore(idOptions: string | ({ id: string }), setup: object 
 
     if (!pinia._s.has(id)) {
     //   创建store
-      createOptionStore(id, options, pinia)
+      if (isSetupStore) {
+        createSetupStore(id, setup as (() => Record<string, any>), pinia)
+      }
+      else {
+        createOptionStore(id, options, pinia)
+      }
     }
 
     const store = pinia._s.get(id)
