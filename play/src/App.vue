@@ -10,25 +10,28 @@ const { count, double } = storeToRefs(counterStore)
 const { age } = storeToRefs(userStore)
 const { increment } = userStore
 
-setTimeout(() => {
-  userStore.$patch((state) => {
-    state.age = 30
-  })
-}, 1000)
-setTimeout(() => {
+function handleReset() {
   counterStore.$reset()
-}, 3000)
+}
+
+function handleDispose1() {
+  userStore.$dispose()
+}
 </script>
 
 <template>
   <div>
     <div>
-      <button @click="counterStore.increment">
-        +
-      </button>
       count: {{ count }} -- double: {{ double }}
       <button @click="counterStore.decrement">
         -
+      </button>
+      <button @click="counterStore.increment">
+        +
+      </button>
+
+      <button @click="handleReset">
+        重置
       </button>
     </div>
 
@@ -40,6 +43,10 @@ setTimeout(() => {
       </button>
       <button @click="userStore.decrement">
         -
+      </button>
+
+      <button @click="handleDispose1">
+        销毁
       </button>
     </div>
   </div>

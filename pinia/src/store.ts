@@ -1,7 +1,7 @@
 import type { ComputedRef, EffectScope, Ref } from 'vue'
 import type { PiniaType } from './createPinia'
 import { isFunction, isObject, isString } from '@vue/shared'
-import { computed, effectScope, getCurrentInstance, inject, isRef, reactive, toRefs } from 'vue'
+import { computed, effectScope, getCurrentInstance, inject, isRef, reactive, toRefs, watch } from 'vue'
 import { piniaSymbol } from './rootStore'
 
 interface storeExternal {
@@ -9,9 +9,13 @@ interface storeExternal {
   $reset: () => void
 }
 
-function merge(target: Record<string, any>, partialStore: Record<string, any>) {
-  for (const key in partialStore) {
-    const newState = partialStore[key]
+function isComputed(o: any): o is ComputedRef {
+  return !!(isRef(o) && (o as any).effect)
+}
+
+function merge(target: Record<string, any>, partialState: Record<string, any>) {
+  for (const key in partialState) {
+    const newState = partialState[key]
     const oldState = target[key]
 
     if (isObject(newState) && isObject(oldState) && !isRef(newState)) {
@@ -48,26 +52,39 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
     return Object.assign(localStore, actions, getters)
   }
 
-  const store = createSetupStore(id, setup, pinia) as unknown as storeExternal
+  const store = createSetupStore(id, setup, pinia, false) as unknown as storeExternal
 
   store.$reset = function () {
     store.$patch(state?.() ?? {})
   }
 }
 
-function createSetupStore(id: string, setup: () => Record<string, any>, pinia: PiniaType) {
-  const { actions = {} } = setup as any
+function createSetupStore(id: string, setup: () => Record<string, any>, pinia: PiniaType, isSetupStore: boolean) {
+  let scope: EffectScope
+
   const store = reactive({
     $patch(partialStateOrMutator: Record<string, any> | ((state: Ref) => void)) {
       if (isFunction(partialStateOrMutator)) {
         partialStateOrMutator(pinia._s.get(id))
       }
       else {
-        merge(pinia._s.get(id), partialStateOrMutator)
+        merge(pinia.state!.value[id], partialStateOrMutator)
       }
     },
+
+    $subscribe(fn: (state: any, id: string) => void) {
+      const state = pinia.state?.value[id]
+
+      scope.run(() => watch(state, (newState) => {
+        fn(newState, id)
+      }))
+    },
+
+    $dispose() {
+      scope.stop()
+      pinia._s.delete(id)
+    },
   })
-  let scope: EffectScope
 
   function wrapAction(action: (...args: any[]) => any) {
     return function (...args: any[]) {
@@ -82,15 +99,29 @@ function createSetupStore(id: string, setup: () => Record<string, any>, pinia: P
     return scope.run(() => setup())
   })
 
-  for (const key in actions) {
-    const fn = actions[key]
+  if (!pinia.state?.value[id]) {
+    pinia.state!.value[id] = {}
+  }
 
-    if (isFunction(fn) && setupStore) {
+  for (const key in setupStore) {
+    const fn = setupStore[key]
+
+    if (isFunction(fn)) {
       setupStore[key] = wrapAction(fn)
+    }
+    else if (isSetupStore && !isComputed(fn)) {
+      pinia.state!.value[id][key] = fn
     }
   }
 
   Object.assign(store, setupStore)
+
+  Object.defineProperty(store, '$state', {
+    get() { return pinia.state!.value[id] },
+    set(newState) { store.$patch(newState) },
+  })
+
+  pinia._p.forEach(plugin => scope.run(() => plugin({ store, id })))
   pinia._s.set(id, store)
 
   return store
@@ -117,7 +148,7 @@ export function defineStore(idOptions: string | ({ id: string }), setup: object 
     if (!pinia._s.has(id)) {
     //   创建store
       if (isSetupStore) {
-        createSetupStore(id, setup as (() => Record<string, any>), pinia)
+        createSetupStore(id, setup as (() => Record<string, any>), pinia, true)
       }
       else {
         createOptionStore(id, options, pinia)
