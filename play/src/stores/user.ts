@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 const useUserStore = defineStore('user', () => ({
-  age: 0,
+  age: ref(0),
   increment() {
     this.age++
   },

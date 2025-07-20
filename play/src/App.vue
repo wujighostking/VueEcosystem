@@ -8,6 +8,7 @@ const userStore = useUserStore()
 
 const { count, double } = storeToRefs(counterStore)
 const { age } = storeToRefs(userStore)
+const { increment } = userStore
 </script>
 
 <template>
@@ -25,7 +26,7 @@ const { age } = storeToRefs(userStore)
     <div>
       {{ age }}
 
-      <button @click="userStore.increment">
+      <button @click="increment">
         +
       </button>
       <button @click="userStore.decrement">
