@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import useCounterStore from '@/stores/counter'
 import useUserStore from '@/stores/user'
 
 const counterStore = useCounterStore()
 const userStore = useUserStore()
+
+const { count, double } = storeToRefs(counterStore)
+const { age } = storeToRefs(userStore)
 </script>
 
 <template>
@@ -12,14 +16,14 @@ const userStore = useUserStore()
       <button @click="counterStore.increment">
         +
       </button>
-      count: {{ counterStore.count }} -- double: {{ counterStore.double }}
+      count: {{ count }} -- double: {{ double }}
       <button @click="counterStore.decrement">
         -
       </button>
     </div>
 
     <div>
-      {{ userStore.count }}
+      {{ age }}
 
       <button @click="userStore.increment">
         +

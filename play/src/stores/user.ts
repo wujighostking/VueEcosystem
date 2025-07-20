@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 
 const useUserStore = defineStore('user', () => ({
-  count: 0,
+  age: 0,
   increment() {
-    this.count++
+    this.age++
   },
   decrement() {
-    this.count--
+    this.age--
   },
 }))
 

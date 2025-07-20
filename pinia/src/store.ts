@@ -1,7 +1,7 @@
 import type { ComputedRef, EffectScope } from 'vue'
 import type { PiniaType } from './createPinia'
 import { isFunction, isString } from '@vue/shared'
-import { computed, effectScope, getCurrentInstance, inject, reactive } from 'vue'
+import { computed, effectScope, getCurrentInstance, inject, reactive, ref, toRefs } from 'vue'
 
 import { piniaSymbol } from './rootStore'
 
@@ -20,7 +20,8 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
   }
 
   function setup() {
-    const localStore = pinia.state!.value[id] = state?.() ?? {}
+    pinia.state!.value[id] = state?.() ?? {}
+    const localStore = toRefs(pinia.state!.value[id])
 
     const getters = handleGettersToComputed()
 
@@ -45,7 +46,14 @@ function createSetupStore(id: string, setup: () => Record<string, any>, pinia: P
 
   const setupStore = pinia._e.run(() => {
     scope = effectScope()
-    return scope.run(() => setup())
+    return scope.run(() => {
+      const result = setup()
+      for (const key in result) {
+        result[key] = ref(result[key])
+      }
+
+      return result
+    })
   })
 
   for (const key in actions) {
