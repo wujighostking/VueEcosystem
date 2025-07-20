@@ -9,6 +9,15 @@ const userStore = useUserStore()
 const { count, double } = storeToRefs(counterStore)
 const { age } = storeToRefs(userStore)
 const { increment } = userStore
+
+setTimeout(() => {
+  userStore.$patch((state) => {
+    state.age = 30
+  })
+}, 1000)
+setTimeout(() => {
+  counterStore.$reset()
+}, 3000)
 </script>
 
 <template>

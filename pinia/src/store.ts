@@ -1,9 +1,29 @@
-import type { ComputedRef, EffectScope } from 'vue'
+import type { ComputedRef, EffectScope, Ref } from 'vue'
 import type { PiniaType } from './createPinia'
-import { isFunction, isString } from '@vue/shared'
-import { computed, effectScope, getCurrentInstance, inject, reactive, toRefs } from 'vue'
-
+import { isFunction, isObject, isString } from '@vue/shared'
+import { computed, effectScope, getCurrentInstance, inject, isRef, reactive, toRefs } from 'vue'
 import { piniaSymbol } from './rootStore'
+
+interface storeExternal {
+  $patch: (state: Record<string, any>) => void
+  $reset: () => void
+}
+
+function merge(target: Record<string, any>, partialStore: Record<string, any>) {
+  for (const key in partialStore) {
+    const newState = partialStore[key]
+    const oldState = target[key]
+
+    if (isObject(newState) && isObject(oldState) && !isRef(newState)) {
+      target[key] = merge(oldState, newState)
+    }
+    else {
+      target[key] = newState
+    }
+  }
+
+  return target
+}
 
 function createOptionStore(id: string, options: any, pinia: PiniaType) {
   const { state, getters = {}, actions = {} } = options
@@ -28,12 +48,25 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
     return Object.assign(localStore, actions, getters)
   }
 
-  createSetupStore(id, setup, pinia)
+  const store = createSetupStore(id, setup, pinia) as unknown as storeExternal
+
+  store.$reset = function () {
+    store.$patch(state?.() ?? {})
+  }
 }
 
 function createSetupStore(id: string, setup: () => Record<string, any>, pinia: PiniaType) {
   const { actions = {} } = setup as any
-  const store = reactive({})
+  const store = reactive({
+    $patch(partialStateOrMutator: Record<string, any> | ((state: Ref) => void)) {
+      if (isFunction(partialStateOrMutator)) {
+        partialStateOrMutator(pinia._s.get(id))
+      }
+      else {
+        merge(pinia._s.get(id), partialStateOrMutator)
+      }
+    },
+  })
   let scope: EffectScope
 
   function wrapAction(action: (...args: any[]) => any) {
@@ -59,6 +92,8 @@ function createSetupStore(id: string, setup: () => Record<string, any>, pinia: P
 
   Object.assign(store, setupStore)
   pinia._s.set(id, store)
+
+  return store
 }
 
 export function defineStore(idOptions: string | ({ id: string }), setup: object | (() => Record<string, any>)) {
