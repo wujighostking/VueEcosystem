@@ -11,7 +11,8 @@ function createOptionStore(id: string, options: any, pinia: PiniaType) {
     return Object.keys(getters).reduce<Record<string, ComputedRef>>((getter, getterName) => {
       getter[getterName] = computed(() => {
         const store = pinia._s.get(id)
-        getters[getterName].call(store)
+
+        return getters[getterName].call(store)
       })
 
       return getter
