@@ -60,6 +60,9 @@ importers:
         specifier: workspace:*
         version: link:../pinia
     devDependencies:
+      '@vitejs/plugin-test':
+        specifier: workspace:^
+        version: link:../vite-plugins
       '@vitejs/plugin-vue':
         specifier: ^6.0.0
         version: 6.0.0(vite@7.0.5(@types/node@24.0.7)(jiti@2.4.2)(yaml@2.8.0))(vue@3.5.17(typescript@5.8.3))
@@ -75,6 +78,8 @@ importers:
       vue-tsc:
         specifier: ^2.2.12
         version: 2.2.12(typescript@5.8.3)
+
+  vite-plugins: {}
 
 packages:
 

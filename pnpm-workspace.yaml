@@ -1,6 +1,7 @@
 packages:
   - 'pinia'
   - 'play'
+  - 'vite-plugins'
   - 'vue'
   - 'vue-router'
   - 'vuex'

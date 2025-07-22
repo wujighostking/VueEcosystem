@@ -7,7 +7,9 @@
   "main": "index.js",
   "scripts": {
     "dev:pinia": "pnpm --filter play dev",
+    "dev:plugin": "pnpm --filter play dev",
     "build:pinia": "pnpm --filter pinia build",
+    "build:plugin": "pnpm --filter @vitejs/plugin-test build",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "commitlint": "commitlint --edit",

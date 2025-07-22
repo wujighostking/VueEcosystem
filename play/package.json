@@ -12,6 +12,7 @@
     "pinia": "workspace:*"
   },
   "devDependencies": {
+    "@vitejs/plugin-test": "workspace:^",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/tsconfig": "^0.7.0",
     "typescript": "~5.8.3",
