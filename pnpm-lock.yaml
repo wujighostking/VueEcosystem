@@ -60,7 +60,7 @@ importers:
         specifier: workspace:*
         version: link:../pinia
     devDependencies:
-      '@vitejs/plugin-test':
+      '@vitejs/plugin-image':
         specifier: workspace:^
         version: link:../vite-plugins
       '@vitejs/plugin-vue':
