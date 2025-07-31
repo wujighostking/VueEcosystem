@@ -8,6 +8,7 @@
   "scripts": {
     "dev:pinia": "pnpm --filter play dev",
     "dev:plugin": "pnpm build:plugin && pnpm --filter play dev",
+    "dev:vue": "pnpm --filter vue dev",
     "build:pinia": "pnpm --filter pinia build",
     "build:plugin": "pnpm --filter @vitejs/plugin-image build",
     "build": "pnpm --filter play build",
