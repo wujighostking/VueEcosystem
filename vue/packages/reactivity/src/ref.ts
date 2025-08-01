@@ -1,4 +1,4 @@
-import type { ReactiveEffect } from 'vue'
+import type { ReactiveEffect } from './effect'
 import { activeSub } from './effect'
 
 export function ref<T = any>(value: T) {
@@ -99,7 +99,7 @@ function trigger(dep: Dependency) {
 function propagate(subs: Link) {
   let link: Link | undefined = subs
 
-  const queuedEffect = []
+  const queuedEffect: any[] = []
 
   while (link) {
     queuedEffect.push(link.sub)

@@ -12,7 +12,7 @@ export function effect(fn: () => any) {
   e.run()
 }
 
-class ReactiveEffect implements Subscribe {
+export class ReactiveEffect implements Subscribe {
   public deps: Link | undefined
   public depsTail: Link | undefined
 
