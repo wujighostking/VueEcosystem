@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <button id="btn">count++</button>
+    <script type="module">
+        import { ref, effect } from '../dist/index.js'
+
+        const count = ref(0)
+        const age = ref(18)
+
+        effect(() => {
+          console.log('age: ', age.value)
+          console.log('count: ', count.value)
+        })
+
+        btn.onclick = () => {
+          count.value++
+          age.value++
+        }
+    </script>
+</body>
+</html>

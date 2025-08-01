@@ -6,40 +6,35 @@ export function ref<T = any>(value: T) {
 }
 
 export interface Link {
-  sub: ReactiveEffect | undefined
+  sub: Subscribe | undefined
   prevSub: Link | undefined
   nextSub: Link | undefined
+
+  dep: Dependency | undefined
+  nextDep: Link | undefined
 }
 
-class RefImpl<T = any> {
+export interface Dependency {
+  subs: Link | undefined
+  subsTail: Link | undefined
+}
+
+export interface Subscribe {
+  deps: Link | undefined
+  depsTail: Link | undefined
+}
+
+class RefImpl<T = any> implements Dependency {
   private _value: T
   public subs: Link | undefined
-  public subTail: Link | undefined
+  public subsTail: Link | undefined
 
   constructor(value: T) {
     this._value = value
   }
 
   get value() {
-    // tracked(this)
-
-    if (activeSub) {
-      const link: Link = {
-        sub: activeSub,
-        prevSub: undefined,
-        nextSub: undefined,
-      }
-
-      if (!this.subTail) {
-        this.subs = link
-        this.subTail = link
-      }
-      else {
-        this.subTail.nextSub = link
-        link.prevSub = this.subTail
-        this.subTail = link
-      }
-    }
+    tracked(this)
 
     return this._value
   }
@@ -47,22 +42,72 @@ class RefImpl<T = any> {
   set value(newValue: T) {
     this._value = newValue
 
-    let link = this.subs
-
-    const queuedEffect = []
-
-    while (link) {
-      queuedEffect.push(link.sub)
-
-      link = link.nextSub
-    }
-
-    queuedEffect.forEach((effect) => {
-      effect()
-    })
+    trigger(this)
   }
 }
 
-// function tracked(dep) {
-//
-// }
+function tracked(dep: Dependency) {
+  if (activeSub) {
+    link(dep, activeSub)
+  }
+}
+
+function link(dep: Dependency, sub: Subscribe) {
+  const currentDep = sub.depsTail
+  const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
+
+  if (nextDep && nextDep.dep === dep) {
+    sub.depsTail = nextDep
+    return
+  }
+
+  const link: Link = {
+    sub,
+    prevSub: undefined,
+    nextSub: undefined,
+
+    dep,
+    nextDep: undefined,
+  }
+
+  if (dep.subsTail) {
+    dep.subsTail.nextSub = link
+    link.prevSub = dep.subsTail
+    dep.subsTail = link
+  }
+  else {
+    dep.subs = link
+    dep.subsTail = link
+  }
+
+  if (sub.depsTail) {
+    sub.depsTail.nextDep = link
+    sub.depsTail = link
+  }
+  else {
+    sub.deps = link
+    sub.depsTail = link
+  }
+}
+
+function trigger(dep: Dependency) {
+  if (dep.subs) {
+    propagate(dep.subs)
+  }
+}
+
+function propagate(subs: Link) {
+  let link: Link | undefined = subs
+
+  const queuedEffect = []
+
+  while (link) {
+    queuedEffect.push(link.sub)
+
+    link = link.nextSub
+  }
+
+  queuedEffect.forEach((effect: ReactiveEffect) => {
+    effect.notify()
+  })
+}

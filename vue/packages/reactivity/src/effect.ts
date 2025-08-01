@@ -1,7 +1,9 @@
-// eslint-disable-next-line import/no-mutable-exports
-export let activeSub: (() => any) | undefined
+import type { Link, Subscribe } from './ref'
 
-export function setActiveSub(currentSub: (() => any) | undefined) {
+// eslint-disable-next-line import/no-mutable-exports
+export let activeSub: ReactiveEffect | undefined
+
+export function setActiveSub(currentSub: ReactiveEffect | undefined) {
   activeSub = currentSub
 }
 
@@ -10,7 +12,10 @@ export function effect(fn: () => any) {
   e.run()
 }
 
-class ReactiveEffect {
+class ReactiveEffect implements Subscribe {
+  public deps: Link | undefined
+  public depsTail: Link | undefined
+
   constructor(public fn: () => any) {
   }
 
@@ -18,12 +23,22 @@ class ReactiveEffect {
     const prevSub = activeSub
 
     try {
-      setActiveSub(this.fn)
+      setActiveSub(this)
+
+      this.depsTail = undefined
 
       return this.fn()
     }
     finally {
       setActiveSub(prevSub)
     }
+  }
+
+  scheduler() {
+    this.run()
+  }
+
+  notify() {
+    this.scheduler()
   }
 }
