@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script type="module">
+        import { ref, effect } from '../dist/index.js'
+
+        const count = ref(0)
+
+        effect(() => {
+          console.log('count1: ', count.value)
+        })
+
+        effect(() => {
+          console.log('count2: ', count.value)
+        })
+
+        setTimeout(() => count.value++, 1000)
+    </script>
+</body>
+</html>

@@ -8,7 +8,7 @@ function setConfig() {
     config.push({
       entry: `./packages/${pkg}/src/index.ts`,
       dts: true,
-      format: 'esm',
+      format: ['esm', 'cjs'],
       clean: true,
       sourcemap: true,
       watch: `./packages/${pkg}/src`,
