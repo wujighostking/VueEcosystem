@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <div id="content"></div>
+    <button id="flagBtn">flag改变</button>
+    <button id="nameBtn">name改变</button>
+    <button id="ageBtn">age++</button>
+    <script type="module">
+        import { ref, effect } from '../dist/index.js'
+        // import {ref, effect} from '../../../../node_modules/vue/dist/vue.esm-browser.prod.js'
+
+        const flag = ref(true)
+        const name = ref('张三')
+        const age = ref(18)
+
+        let count = 0
+
+        effect(() => {
+          console.count('effect')
+
+          // if (count > 0) return
+          // count++
+
+          if (flag.value) {
+            content.textContent = name.value
+          }
+          else {
+            content.textContent = age.value
+          }
+        })
+
+        flagBtn.onclick = () => {
+          flag.value = !flag.value
+        }
+        nameBtn.onclick = () => {
+          name.value = name.value + Math.random()
+        }
+        ageBtn.onclick = () => {
+          age.value++
+        }
+    </script>
+</body>
+</html>

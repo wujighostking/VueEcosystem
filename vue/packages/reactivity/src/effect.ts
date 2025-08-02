@@ -1,4 +1,5 @@
 import type { Link, Subscribe } from './system'
+import { endTrack, startTrack } from './system'
 
 // eslint-disable-next-line import/no-mutable-exports
 export let activeSub: ReactiveEffect | undefined
@@ -35,11 +36,13 @@ export class ReactiveEffect implements Subscribe {
     try {
       setActiveSub(this)
 
-      this.depsTail = undefined
+      startTrack(this)
 
       return this.fn()
     }
     finally {
+      endTrack(this)
+
       setActiveSub(prevSub)
     }
   }

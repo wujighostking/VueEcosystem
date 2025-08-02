@@ -41,7 +41,7 @@ function link(dep: Dependency, sub: Subscribe) {
     nextSub: undefined,
 
     dep,
-    nextDep: undefined,
+    nextDep,
   }
 
   if (dep.subsTail) {
@@ -84,4 +84,48 @@ function propagate(subs: Link) {
   queuedEffect.forEach((effect: ReactiveEffect) => {
     effect.notify()
   })
+}
+
+export function startTrack(sub: Subscribe) {
+  sub.depsTail = undefined
+}
+
+export function endTrack(sub: Subscribe) {
+  const depsTail = sub.depsTail
+
+  if (depsTail) {
+    if (depsTail.nextDep) {
+      clearTracking(depsTail.nextDep)
+      depsTail.nextDep = undefined
+    }
+  }
+  else if (sub.deps) {
+    clearTracking(sub.deps)
+    sub.deps = undefined
+  }
+}
+
+export function clearTracking(link: Link) {
+  while (link) {
+    const { prevSub, nextSub, dep, nextDep } = link
+
+    if (prevSub) {
+      link.nextSub = prevSub
+      link.nextSub = undefined
+    }
+    else {
+      dep.subs = nextSub
+    }
+
+    if (nextSub) {
+      nextSub.prevSub = prevSub
+      link.prevSub = undefined
+    }
+    else {
+      dep.subsTail = prevSub
+    }
+    link.dep = link.sub = undefined
+    link.nextDep = undefined
+    link = nextDep
+  }
 }
