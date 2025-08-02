@@ -26,6 +26,8 @@ export function tracked(dep: Dependency) {
   }
 }
 
+let linkPool: Link | undefined
+
 function link(dep: Dependency, sub: Subscribe) {
   const currentDep = sub.depsTail
   const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
@@ -35,13 +37,25 @@ function link(dep: Dependency, sub: Subscribe) {
     return
   }
 
-  const link: Link = {
-    sub,
-    prevSub: undefined,
-    nextSub: undefined,
+  let link: Link
 
-    dep,
-    nextDep,
+  if (linkPool) {
+    link = linkPool
+    linkPool = linkPool.nextDep
+
+    link.sub = sub
+    link.dep = dep
+    link.nextDep = nextDep
+  }
+  else {
+    link = {
+      sub,
+      prevSub: undefined,
+      nextSub: undefined,
+
+      dep,
+      nextDep,
+    }
   }
 
   if (dep.subsTail) {
@@ -125,7 +139,8 @@ export function clearTracking(link: Link) {
       dep.subsTail = prevSub
     }
     link.dep = link.sub = undefined
-    link.nextDep = undefined
+    link.nextDep = linkPool
+    linkPool = link
     link = nextDep
   }
 }
