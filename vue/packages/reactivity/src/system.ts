@@ -28,7 +28,7 @@ export function tracked(dep: Dependency) {
 
 let linkPool: Link | undefined
 
-function link(dep: Dependency, sub: Subscribe) {
+export function link(dep: Dependency, sub: Subscribe) {
   const currentDep = sub.depsTail
   const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
 
@@ -84,7 +84,7 @@ export function trigger(dep: Dependency) {
   }
 }
 
-function propagate(subs: Link) {
+export function propagate(subs: Link) {
   let link: Link | undefined = subs
 
   const queuedEffect: any[] = []

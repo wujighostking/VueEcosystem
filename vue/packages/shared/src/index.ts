@@ -11,3 +11,7 @@ export function isNumber(value: any) {
 export function isString(value: any) {
   return typeof value === 'string'
 }
+
+export function hasChanged<T = any>(oldValue: T, newValue: T) {
+  return !Object.is(oldValue, newValue)
+}

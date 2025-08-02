@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <script type="module">
+      import { reactive, effect, ref } from '../dist/index.js'
+
+      const b = ref(1)
+      const obj = {
+        a: 0,
+        get count() {
+          return this.a
+        },
+        b,
+        c: {
+          d: 5
+        }
+      }
+
+      const count = reactive(obj)
+      const count1 = reactive(obj)
+      const count2 = reactive(count1)
+
+      console.log(count === count1, count1 === count2)
+
+      effect(() => {
+        console.log('count: ', count.count, count.b, b.value, count.c.d)
+      })
+
+      setTimeout(() => {
+        count.a++
+        count.b++
+        count.c.d++
+      }, 1000)
+    </script>
+  </body>
+</html>
