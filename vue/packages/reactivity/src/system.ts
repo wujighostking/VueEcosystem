@@ -90,8 +90,10 @@ function propagate(subs: Link) {
   const queuedEffect: any[] = []
 
   while (link) {
-    queuedEffect.push(link.sub)
-
+    const sub = link.sub
+    if (!sub.tracking) {
+      queuedEffect.push(sub)
+    }
     link = link.nextSub
   }
 
@@ -100,11 +102,13 @@ function propagate(subs: Link) {
   })
 }
 
-export function startTrack(sub: Subscribe) {
+export function startTrack(sub: ReactiveEffect) {
+  sub.tracking = true
   sub.depsTail = undefined
 }
 
-export function endTrack(sub: Subscribe) {
+export function endTrack(sub: ReactiveEffect) {
+  sub.tracking = false
   const depsTail = sub.depsTail
 
   if (depsTail) {

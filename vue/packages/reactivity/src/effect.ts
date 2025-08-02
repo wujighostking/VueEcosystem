@@ -26,6 +26,7 @@ export function effect(fn: () => any, options?: EffectOptions) {
 export class ReactiveEffect implements Subscribe {
   public deps: Link | undefined
   public depsTail: Link | undefined
+  public tracking = false
 
   constructor(public fn: () => any) {
   }
