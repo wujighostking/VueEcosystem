@@ -18,6 +18,7 @@ export interface Dependency {
 export interface Subscribe {
   deps: Link | undefined
   depsTail: Link | undefined
+  tracking: boolean
 }
 
 export function tracked(dep: Dependency) {
@@ -91,7 +92,7 @@ export function propagate(subs: Link) {
 
   while (link) {
     const sub = link.sub
-    if (!sub.tracking) {
+    if (!sub?.tracking) {
       queuedEffect.push(sub)
     }
     link = link.nextSub
@@ -123,7 +124,7 @@ export function endTrack(sub: ReactiveEffect) {
   }
 }
 
-export function clearTracking(link: Link) {
+export function clearTracking(link: Link | undefined) {
   while (link) {
     const { prevSub, nextSub, dep, nextDep } = link
 
@@ -132,7 +133,7 @@ export function clearTracking(link: Link) {
       link.nextSub = undefined
     }
     else {
-      dep.subs = nextSub
+      dep!.subs = nextSub
     }
 
     if (nextSub) {
@@ -140,7 +141,7 @@ export function clearTracking(link: Link) {
       link.prevSub = undefined
     }
     else {
-      dep.subsTail = prevSub
+      dep!.subsTail = prevSub
     }
     link.dep = link.sub = undefined
     link.nextDep = linkPool
