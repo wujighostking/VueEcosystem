@@ -15,3 +15,7 @@ export function isString(value: any) {
 export function hasChanged<T = any>(oldValue: T, newValue: T) {
   return !Object.is(oldValue, newValue)
 }
+
+export function isFunction(value: any) {
+  return typeof value === 'function'
+}

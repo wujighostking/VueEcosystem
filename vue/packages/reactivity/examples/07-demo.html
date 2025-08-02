@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <script type="module">
+      import { ref, effect, computed } from '../dist/index.js'
+
+      const count = ref(0)
+      const state = computed(() => count.value + 1)
+
+      effect(() => {
+        console.log('computed: ', state.value)
+      })
+
+      setTimeout(() => {
+        count.value++
+      }, 1000)
+    </script>
+  </body>
+</html>

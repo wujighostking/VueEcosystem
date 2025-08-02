@@ -85,15 +85,20 @@ export function trigger(dep: Dependency) {
   }
 }
 
-export function propagate(subs: Link) {
-  let link: Link | undefined = subs
+export function propagate(subs: Link | undefined) {
+  let link = subs
 
   const queuedEffect: any[] = []
 
   while (link) {
     const sub = link.sub
     if (!sub?.tracking) {
-      queuedEffect.push(sub)
+      if ('update' in sub!) {
+        processComputedUpdate(sub as any)
+      }
+      else {
+        queuedEffect.push(sub)
+      }
     }
     link = link.nextSub
   }
@@ -103,12 +108,12 @@ export function propagate(subs: Link) {
   })
 }
 
-export function startTrack(sub: ReactiveEffect) {
+export function startTrack(sub: Subscribe) {
   sub.tracking = true
   sub.depsTail = undefined
 }
 
-export function endTrack(sub: ReactiveEffect) {
+export function endTrack(sub: Subscribe) {
   sub.tracking = false
   const depsTail = sub.depsTail
 
@@ -148,4 +153,9 @@ export function clearTracking(link: Link | undefined) {
     linkPool = link
     link = nextDep
   }
+}
+
+export function processComputedUpdate(sub: { update: () => any } & Dependency) {
+  sub.update()
+  propagate(sub.subs)
 }

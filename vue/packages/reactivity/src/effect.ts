@@ -2,9 +2,9 @@ import type { Link, Subscribe } from './system'
 import { endTrack, startTrack } from './system'
 
 // eslint-disable-next-line import/no-mutable-exports
-export let activeSub: ReactiveEffect | undefined
+export let activeSub: Subscribe | undefined
 
-export function setActiveSub(currentSub: ReactiveEffect | undefined) {
+export function setActiveSub(currentSub: Subscribe | undefined) {
   activeSub = currentSub
 }
 
@@ -17,7 +17,7 @@ export function effect(fn: () => any, options?: EffectOptions) {
   Object.assign(e, options)
   e.run()
 
-  const runner: { effect: ReactiveEffect } = e.run.bind(e)
+  const runner: { effect: ReactiveEffect } = e.run.bind(e) as any
   runner.effect = e
 
   return runner
