@@ -1,4 +1,5 @@
 import type { Dependency, Link } from './system'
+import { isArray } from '@vue/shared'
 import { activeSub } from './effect'
 import { link, propagate } from './system'
 
@@ -29,12 +30,22 @@ export function trigger(target: Record<any, any>, key: keyof typeof target) {
     return
   }
 
-  const dep: Dep = depsMap.get(key)
-  if (!dep) {
-    return
+  if (isArray(target)) {
+    const length = target.length
+    depsMap.forEach((dep: Dep, depKey: number | 'length') => {
+      if (depKey === 'length' || depKey >= length) {
+        propagate(dep.subs!)
+      }
+    })
   }
+  else {
+    const dep: Dep = depsMap.get(key)
+    if (!dep) {
+      return
+    }
 
-  propagate(dep.subs!)
+    propagate(dep.subs!)
+  }
 }
 
 export class Dep implements Dependency {

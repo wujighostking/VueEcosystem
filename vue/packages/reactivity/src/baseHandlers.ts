@@ -22,13 +22,13 @@ export const mutableHandlers: ProxyHandler<Record<any, any>> = {
   set(target, key: keyof typeof target, newValue, receiver) {
     const oldValue = target[key]
 
-    const res = Reflect.set(target, key, newValue, receiver)
-
     if (isRef(oldValue) && !isRef(newValue)) {
       oldValue.value = newValue
 
-      return res
+      return true
     }
+
+    const res = Reflect.set(target, key, newValue, receiver)
 
     if (hasChanged(oldValue, newValue)) {
       trigger(target, key)

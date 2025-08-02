@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <script type="module">
+      import { reactive, effect } from '../dist/index.js'
+
+      const state = reactive(['a', 'b', 'c', 'd'])
+
+      effect(() => {
+        console.log('length: ', state.length)
+      })
+
+      // setTimeout(() => {
+      //   // state.length = 2
+      //   state[1] = '111'
+      // }, 1000)
+
+
+      setTimeout(() => {
+        state.pop()
+      }, 2000)
+    </script>
+  </body>
+</html>
