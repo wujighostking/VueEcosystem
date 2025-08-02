@@ -1,4 +1,4 @@
-import type { Link, Subscribe } from './ref'
+import type { Link, Subscribe } from './system'
 
 // eslint-disable-next-line import/no-mutable-exports
 export let activeSub: ReactiveEffect | undefined
