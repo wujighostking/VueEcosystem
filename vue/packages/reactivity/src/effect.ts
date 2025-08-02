@@ -7,9 +7,19 @@ export function setActiveSub(currentSub: ReactiveEffect | undefined) {
   activeSub = currentSub
 }
 
-export function effect(fn: () => any) {
+interface EffectOptions {
+  scheduler: (...args: any[]) => any
+}
+
+export function effect(fn: () => any, options?: EffectOptions) {
   const e = new ReactiveEffect(fn)
+  Object.assign(e, options)
   e.run()
+
+  const runner: { effect: ReactiveEffect } = e.run.bind(e)
+  runner.effect = e
+
+  return runner
 }
 
 export class ReactiveEffect implements Subscribe {
