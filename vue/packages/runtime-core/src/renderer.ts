@@ -286,3 +286,69 @@ export function createRenderer(options) {
     render,
   }
 }
+
+function getSequence(arr: number[]) {
+  const res = []
+  const map = new Map()
+  for (let i = 0; i < arr.length; i++) {
+    if (res.length === 0) {
+      res.push(i)
+      continue
+    }
+
+    const item = arr[i]
+    const lastIndex = res[res.length - 1]
+    if (item > arr[lastIndex]) {
+      res.push(i)
+      map.set(i, lastIndex)
+      continue
+    }
+
+    let start = 0
+    let end = res.length - 1
+    while (start < end) {
+      const mid = ((start + end) / 2) | 0
+      if (arr[res[mid]] < item) {
+        start = mid + 1
+      }
+      else {
+        end = mid
+      }
+    }
+
+    if (arr[res[start]] > item) {
+      if (start > 0) {
+        map.set(i, res[start - 1])
+      }
+
+      res[start] = i
+    }
+  }
+  let l = res.length
+  let last = res[l - 1]
+  while (l-- > 0) {
+    res[l] = last
+
+    last = map.get(last)
+  }
+
+  return res
+}
+
+// -1, -1, 1, 2,  3, 2,  4, 6
+// 10, 3, 5, 9, 12, 8, 15, 18
+// 0,  1, 2, 3, 4,  5, 6,  7
+
+// 3,5,9,12,15,18
+// 1,2,3,4, 6, 7
+// eslint-disable-next-line no-console
+console.log(getSequence([10, 3, 5, 9, 12, 8, 15, 18]))
+
+// -1,0, -1,1, 3, 4, 4, 6, 1
+// 2, 3, 1, 5, 6, 8, 7, 9, 4
+// 0, 1, 2, 3, 4, 5, 6, 7, 8
+
+// 2, 3, 5, 6, 7, 9
+// 0, 1, 3, 4, 6, 7
+// eslint-disable-next-line no-console
+console.log(getSequence([2, 3, 1, 5, 6, 8, 7, 9, 4]))
