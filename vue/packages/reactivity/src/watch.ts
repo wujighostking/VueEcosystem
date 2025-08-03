@@ -24,5 +24,9 @@ export function watch(source: WatchSource, watchCallback: WatchCallback): WatchS
     oldValue = newValue
   }
 
-  return () => {}
+  function stop() {
+    effect.stop()
+  }
+
+  return stop
 }

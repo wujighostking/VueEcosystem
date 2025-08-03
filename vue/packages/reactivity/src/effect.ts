@@ -28,10 +28,16 @@ export class ReactiveEffect implements Subscribe {
   public depsTail: Link | undefined
   public tracking = false
 
+  public active = true
+
   constructor(public fn: () => any) {
   }
 
   run() {
+    if (!this.active) {
+      return this.fn()
+    }
+
     const prevSub = activeSub
 
     try {
@@ -54,5 +60,14 @@ export class ReactiveEffect implements Subscribe {
 
   notify() {
     this.scheduler()
+  }
+
+  stop() {
+    if (this.active) {
+      startTrack(this)
+      endTrack(this)
+
+      this.active = false
+    }
   }
 }
