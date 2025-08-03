@@ -1,3 +1,4 @@
+import type { ComputedRefImpl } from './computed'
 import type { ReactiveEffect } from './effect'
 import { activeSub } from './effect'
 
@@ -155,7 +156,8 @@ export function clearTracking(link: Link | undefined) {
   }
 }
 
-export function processComputedUpdate(sub: { update: () => any } & Dependency) {
-  sub.update()
-  propagate(sub.subs)
+export function processComputedUpdate(sub: ComputedRefImpl & Dependency) {
+  if (sub && sub.update()) {
+    propagate(sub.subs)
+  }
 }

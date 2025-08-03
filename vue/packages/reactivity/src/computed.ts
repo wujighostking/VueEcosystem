@@ -1,5 +1,5 @@
 import type { Dependency, Link, Subscribe } from './system'
-import { isFunction } from '@vue/shared'
+import { hasChanged, isFunction } from '@vue/shared'
 import { activeSub, setActiveSub } from './effect'
 import { ReactiveFlags } from './ref'
 import { endTrack, link, startTrack } from './system'
@@ -34,11 +34,15 @@ export class ComputedRefImpl<T = any> implements Dependency, Subscribe {
 
   tracking = false
 
+  dirty = true
+
   constructor(public getter: Getter, private setter: Setter) {
   }
 
   get value() {
-    this.update()
+    if (this.dirty) {
+      this.update()
+    }
 
     if (activeSub) {
       link(this, activeSub)
@@ -63,7 +67,12 @@ export class ComputedRefImpl<T = any> implements Dependency, Subscribe {
     startTrack(this)
 
     try {
+      const oldValue = this._value
       this._value = this.getter()
+
+      this.dirty = false
+
+      return hasChanged(oldValue, this._value)
     }
     finally {
       endTrack(this)

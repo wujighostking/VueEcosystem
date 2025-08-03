@@ -9,7 +9,10 @@
       import { ref, effect, computed } from '../dist/index.js'
 
       const count = ref(0)
-      const state = computed(() => count.value + 1)
+      const state = computed(() => {
+        console.count('count')
+        return count.value * 0 // count.value + 1
+      })
 
       effect(() => {
         console.log('computed: ', state.value)
