@@ -1,10 +1,11 @@
 import type { RefImpl } from './ref'
-import { isObject } from '@vue/shared'
+import { isFunction, isObject } from '@vue/shared'
 import { ReactiveEffect } from './effect'
+import { isReactive } from './reactive'
 import { isRef } from './ref'
 
 type WatchCallback = (newValue: any, oldValue: any) => void
-type WatchSource = RefImpl
+type WatchSource = RefImpl | (() => any)
 type WatchStopHandle = () => void
 interface WatchOptions {
   immediate?: boolean
@@ -13,7 +14,7 @@ interface WatchOptions {
 }
 
 export function watch(source: WatchSource, watchCallback: WatchCallback, options?: WatchOptions): WatchStopHandle {
-  const { immediate, once, deep } = options || {}
+  let { immediate, once, deep } = options || {}
 
   if (once) {
     const _watchCallback = watchCallback
@@ -26,7 +27,16 @@ export function watch(source: WatchSource, watchCallback: WatchCallback, options
   let getter!: () => any
 
   if (isRef(source)) {
-    getter = () => source.value
+    getter = () => (source as RefImpl).value
+  }
+  else if (isReactive(source)) {
+    getter = () => source
+    if (!deep) {
+      deep = true
+    }
+  }
+  else if (isFunction(source)) {
+    getter = source as (() => any)
   }
 
   if (deep) {

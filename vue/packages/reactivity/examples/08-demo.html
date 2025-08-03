@@ -6,11 +6,11 @@
   </head>
   <body>
     <script type="module">
-      import { ref, watch } from '../dist/index.js'
+      import { reactive, watch } from '../dist/index.js'
 
       // const count = ref(0)
 
-      const state = ref({
+      const state = reactive({
         a: {
           b: 1,
           c: {
@@ -18,14 +18,14 @@
           }
         }
       })
-      state.value.e = state.value
+      // state.value.e = state.value
 
       watch(state, (newValue, oldValue) => {
         console.log(oldValue, newValue)
       }, {
         // immediate: true,
         // once: true
-        deep: 2,
+        deep: 3,
       })
 
       setTimeout(() => {
@@ -33,7 +33,8 @@
         // setTimeout(() => {
         //   count.value = 2
         // }, 1000)
-        state.value.a.c.d = 6
+        // state.value.a.c.d = 6
+        state.a.c.d = 6
       }, 1000)
     </script>
   </body>

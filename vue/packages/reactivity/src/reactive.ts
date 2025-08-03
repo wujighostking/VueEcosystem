@@ -29,3 +29,7 @@ export function createReactiveImpl<T = Record<any, any>>(target: T & object) {
 
   return proxy
 }
+
+export function isReactive(value: any) {
+  return reactiveSet.has(value)
+}
