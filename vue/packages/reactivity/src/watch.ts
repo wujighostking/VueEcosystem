@@ -1,4 +1,5 @@
 import type { RefImpl } from './ref'
+import { isObject } from '@vue/shared'
 import { ReactiveEffect } from './effect'
 import { isRef } from './ref'
 
@@ -12,7 +13,7 @@ interface WatchOptions {
 }
 
 export function watch(source: WatchSource, watchCallback: WatchCallback, options?: WatchOptions): WatchStopHandle {
-  const { immediate, once } = options || {}
+  const { immediate, once, deep } = options || {}
 
   if (once) {
     const _watchCallback = watchCallback
@@ -26,6 +27,12 @@ export function watch(source: WatchSource, watchCallback: WatchCallback, options
 
   if (isRef(source)) {
     getter = () => source.value
+  }
+
+  if (deep) {
+    const baseGetter = getter
+    const depth = deep === true ? Infinity : deep
+    getter = () => traverse(baseGetter(), depth, new Set())
   }
 
   let oldValue: undefined
@@ -53,4 +60,19 @@ export function watch(source: WatchSource, watchCallback: WatchCallback, options
   }
 
   return stop
+}
+
+function traverse(value: any, depth: number, seen: Set<any>) {
+  if (!isObject(value) || depth <= 0 || seen.has(value)) {
+    return value
+  }
+
+  seen.add(value)
+  depth--
+
+  for (const key in value) {
+    traverse(value[key], depth, seen)
+  }
+
+  return value
 }

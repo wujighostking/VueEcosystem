@@ -8,20 +8,32 @@
     <script type="module">
       import { ref, watch } from '../dist/index.js'
 
-      const count = ref(0)
+      // const count = ref(0)
 
-      watch(count, (newValue, oldValue) => {
+      const state = ref({
+        a: {
+          b: 1,
+          c: {
+            d: 2
+          }
+        }
+      })
+      state.value.e = state.value
+
+      watch(state, (newValue, oldValue) => {
         console.log(oldValue, newValue)
       }, {
-        immediate: true,
-        once: true
+        // immediate: true,
+        // once: true
+        deep: 2,
       })
 
       setTimeout(() => {
-        count.value = 1
-        setTimeout(() => {
-          count.value = 2
-        }, 1000)
+        // count.value = 1
+        // setTimeout(() => {
+        //   count.value = 2
+        // }, 1000)
+        state.value.a.c.d = 6
       }, 1000)
     </script>
   </body>
