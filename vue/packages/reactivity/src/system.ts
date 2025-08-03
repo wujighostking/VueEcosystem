@@ -31,16 +31,6 @@ export function tracked(dep: Dependency) {
 let linkPool: Link | undefined
 
 export function link(dep: Dependency, sub: Subscribe) {
-  if (dep.subs) {
-    let link: Link | undefined = dep.subs
-    while (link) {
-      if (link.sub === sub) {
-        return
-      }
-      link = link.nextSub
-    }
-  }
-
   const currentDep = sub.depsTail
   const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
 
@@ -49,18 +39,22 @@ export function link(dep: Dependency, sub: Subscribe) {
     return
   }
 
-  let link: Link
+  if (existingSubscribe(dep, sub)) {
+    return
+  }
+
+  let newLink: Link
 
   if (linkPool) {
-    link = linkPool
+    newLink = linkPool
     linkPool = linkPool.nextDep
 
-    link.sub = sub
-    link.dep = dep
-    link.nextDep = nextDep
+    newLink.sub = sub
+    newLink.dep = dep
+    newLink.nextDep = nextDep
   }
   else {
-    link = {
+    newLink = {
       sub,
       prevSub: undefined,
       nextSub: undefined,
@@ -71,22 +65,22 @@ export function link(dep: Dependency, sub: Subscribe) {
   }
 
   if (dep.subsTail) {
-    dep.subsTail.nextSub = link
-    link.prevSub = dep.subsTail
-    dep.subsTail = link
+    dep.subsTail.nextSub = newLink
+    newLink.prevSub = dep.subsTail
+    dep.subsTail = newLink
   }
   else {
-    dep.subs = link
-    dep.subsTail = link
+    dep.subs = newLink
+    dep.subsTail = newLink
   }
 
   if (sub.depsTail) {
-    sub.depsTail.nextDep = link
-    sub.depsTail = link
+    sub.depsTail.nextDep = newLink
+    sub.depsTail = newLink
   }
   else {
-    sub.deps = link
-    sub.depsTail = link
+    sub.deps = newLink
+    sub.depsTail = newLink
   }
 }
 
@@ -170,4 +164,18 @@ export function processComputedUpdate(sub: ComputedRefImpl & Dependency) {
   if (sub && sub.update()) {
     propagate(sub.subs)
   }
+}
+
+export function existingSubscribe(dep: Dependency, sub: Subscribe) {
+  if (dep.subs) {
+    let existingLink: Link | undefined = dep.subs
+    while (existingLink) {
+      if (existingLink.sub === sub) {
+        return true
+      }
+      existingLink = existingLink.nextSub
+    }
+  }
+
+  return false
 }
