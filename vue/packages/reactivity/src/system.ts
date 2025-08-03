@@ -31,6 +31,16 @@ export function tracked(dep: Dependency) {
 let linkPool: Link | undefined
 
 export function link(dep: Dependency, sub: Subscribe) {
+  if (dep.subs) {
+    let link: Link | undefined = dep.subs
+    while (link) {
+      if (link.sub === sub) {
+        return
+      }
+      link = link.nextSub
+    }
+  }
+
   const currentDep = sub.depsTail
   const nextDep = currentDep === undefined ? sub.deps : currentDep.nextDep
 

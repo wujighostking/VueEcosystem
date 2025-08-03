@@ -12,10 +12,11 @@
 
         effect(() => {
           console.log('count1: ', count.value)
+          console.log('count2: ', count.value)
         })
 
         effect(() => {
-          console.log('count2: ', count.value)
+          console.log('count3: ', count.value)
         })
 
         setTimeout(() => count.value++, 1000)
