@@ -4,7 +4,7 @@ import { ReactiveEffect } from './effect'
 import { isReactive } from './reactive'
 import { isRef } from './ref'
 
-type WatchCallback = (newValue: any, oldValue: any) => void
+type WatchCallback = (newValue: any, oldValue: any, onCleanup: (cleanup: () => void) => void) => void
 type WatchSource = RefImpl | (() => any)
 type WatchStopHandle = () => void
 interface WatchOptions {
@@ -46,6 +46,7 @@ export function watch(source: WatchSource, watchCallback: WatchCallback, options
   }
 
   let oldValue: undefined
+  let cleanup: null | (() => void)
 
   const effect = new ReactiveEffect(getter)
 
@@ -59,10 +60,18 @@ export function watch(source: WatchSource, watchCallback: WatchCallback, options
   effect.scheduler = job
 
   function job() {
+    if (cleanup) {
+      cleanup()
+      cleanup = null
+    }
     const newValue = effect.run()
-    watchCallback(newValue, oldValue)
+    watchCallback(newValue, oldValue, onCleanup)
 
     oldValue = newValue
+  }
+
+  function onCleanup(cleanupCallback: () => void) {
+    cleanup = cleanupCallback
   }
 
   function stop() {

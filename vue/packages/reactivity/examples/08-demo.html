@@ -6,35 +6,39 @@
   </head>
   <body>
     <script type="module">
-      import { reactive, watch } from '../dist/index.js'
+      import { ref, watch } from '../dist/index.js'
 
-      // const count = ref(0)
+      const count = ref(0)
 
-      const state = reactive({
-        a: {
-          b: 1,
-          c: {
-            d: 2
-          }
-        }
-      })
+      // const state = reactive({
+      //   a: {
+      //     b: 1,
+      //     c: {
+      //       d: 2
+      //     }
+      //   }
+      // })
       // state.value.e = state.value
 
-      watch(state, (newValue, oldValue) => {
+      watch(count, (newValue, oldValue, onCleanup) => {
         console.log(oldValue, newValue)
+
+        onCleanup(() => {
+          console.log('cleanup')
+        })
       }, {
-        // immediate: true,
+        immediate: true,
         // once: true
         deep: 3,
       })
 
       setTimeout(() => {
-        // count.value = 1
+        count.value = 1
         // setTimeout(() => {
         //   count.value = 2
         // }, 1000)
         // state.value.a.c.d = 6
-        state.a.c.d = 6
+        // state.a.c.d = 6
       }, 1000)
     </script>
   </body>
