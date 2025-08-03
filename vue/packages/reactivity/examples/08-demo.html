@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <script type="module">
+      import { ref, watch } from '../dist/index.js'
+
+      const count = ref(0)
+
+      watch(count, (newValue, oldValue) => {
+        console.log(oldValue, newValue)
+      })
+
+      setTimeout(() => {
+        count.value++
+      }, 1000)
+    </script>
+  </body>
+</html>

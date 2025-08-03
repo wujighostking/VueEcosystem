@@ -11,7 +11,7 @@ export enum ReactiveFlags {
   IS_Ref = '__v_isRef',
 }
 
-class RefImpl<T = any> implements Dependency {
+export class RefImpl<T = any> implements Dependency {
   [ReactiveFlags.IS_Ref] = true
   private _value: T
   public subs: Link | undefined
