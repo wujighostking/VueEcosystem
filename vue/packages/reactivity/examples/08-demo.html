@@ -10,14 +10,16 @@
 
       const count = ref(0)
 
-      const stop = watch(count, (newValue, oldValue) => {
+      watch(count, (newValue, oldValue) => {
         console.log(oldValue, newValue)
+      }, {
+        immediate: true,
+        once: true
       })
 
       setTimeout(() => {
         count.value = 1
         setTimeout(() => {
-          stop()
           count.value = 2
         }, 1000)
       }, 1000)
