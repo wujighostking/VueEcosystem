@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import type { InputInstance } from 'element-plus'
 import { ref } from 'vue'
+import MyInput from '@/components/MyInput.vue'
+
 // import { storeToRefs } from 'pinia'
 // import useCounterStore from '@/stores/counter'
 // import useUserStore from '@/stores/user'
@@ -22,13 +25,12 @@ import { ref } from 'vue'
 // function handleClick() {
 //   console.log('11111111')
 // }
-import MyInput from '@/components/MyInput.vue'
 
-const inputRef = ref()
+const inputRef = ref<InputInstance>()
 const inputValue = ref('1111')
 
 function clearValue() {
-  inputRef.value.clear()
+  inputRef.value?.clear()
 }
 </script>
 
