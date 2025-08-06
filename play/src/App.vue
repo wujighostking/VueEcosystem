@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 // import { storeToRefs } from 'pinia'
 // import useCounterStore from '@/stores/counter'
 // import useUserStore from '@/stores/user'
@@ -21,6 +22,14 @@
 // function handleClick() {
 //   console.log('11111111')
 // }
+import MyInput from '@/components/MyInput.vue'
+
+const inputRef = ref()
+const inputValue = ref('1111')
+
+function clearValue() {
+  inputRef.value.clear()
+}
 </script>
 
 <template>
@@ -64,6 +73,20 @@
       <img width="100px" src="http://www.baidu.com/assets/image3.jpg" alt="image3">
     </div>
   </div>
+
+  <MyInput ref="inputRef" v-model="inputValue">
+    <template #custom>
+      <div>这是一个自定义的插槽组件</div>
+    </template>
+
+    <template #append>
+      <div>
+        <el-button type="primary" @click="clearValue">
+          clear
+        </el-button>
+      </div>
+    </template>
+  </MyInput>
 </template>
 
 <style scoped>

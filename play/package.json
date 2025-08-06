@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "pinia": "workspace:*"
+    "element-plus": "^2.10.5",
+    "pinia": "workspace:*",
+    "templates": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-image": "workspace:^",

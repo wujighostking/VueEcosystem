@@ -5,3 +5,4 @@ packages:
   - 'vue'
   - 'vue-router'
   - 'vuex'
+  - 'templates'
