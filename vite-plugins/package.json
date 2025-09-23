@@ -1,19 +1,19 @@
 {
   "name": "@vitejs/plugin-image",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@10.13.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsdown -c tsdown.config.ts"
-  },
-  "types": "./dist/index.d.ts",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.13.0"
+  "main": "index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsdown -c tsdown.config.ts"
+  }
 }

@@ -20,17 +20,21 @@
       // })
       // state.value.e = state.value
 
-      watch(count, (newValue, oldValue, onCleanup) => {
-        console.log(oldValue, newValue)
+      watch(
+        count,
+        (newValue, oldValue, onCleanup) => {
+          console.log(oldValue, newValue)
 
-        onCleanup(() => {
-          console.log('cleanup')
-        })
-      }, {
-        immediate: true,
-        // once: true
-        deep: 3,
-      })
+          onCleanup(() => {
+            console.log('cleanup')
+          })
+        },
+        {
+          immediate: true,
+          // once: true
+          deep: 3,
+        },
+      )
 
       setTimeout(() => {
         count.value = 1

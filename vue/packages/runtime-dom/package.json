@@ -1,7 +1,7 @@
 {
   "name": "@vue/runtime-dom",
-  "version": "1.0.0",
   "type": "module",
+  "version": "1.0.0",
   "description": "浏览器运行时",
   "main": "dist/index.cjs",
   "module": "dist/index.js",

@@ -1,17 +1,17 @@
 {
   "compilerOptions": {
     "target": "ESNext",
+    "lib": ["DOM", "ESNext"],
+    "baseUrl": "./",
     "module": "ESNext",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": false,
-    "skipLibCheck": true,
-    "baseUrl": "./",
     "paths": {
       "@vue/*": ["packages/*/src"]
     },
-    "lib": ["DOM", "ESNext"]
+    "resolveJsonModule": true,
+    "strict": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   }
 }

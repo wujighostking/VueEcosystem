@@ -1,8 +1,8 @@
 packages:
-  - 'pinia'
-  - 'play'
-  - 'vite-plugins'
-  - 'vue'
-  - 'vue-router'
-  - 'vuex'
-  - 'templates'
+  - pinia
+  - play
+  - vite-plugins
+  - vue
+  - vue-router
+  - vuex
+  - templates

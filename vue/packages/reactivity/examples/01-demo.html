@@ -1,25 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Title</title>
-</head>
-<body>
+  </head>
+  <body>
     <script type="module">
-        import { ref, effect } from '../dist/index.js'
+      import { ref, effect } from '../dist/index.js'
 
-        const count = ref(0)
+      const count = ref(0)
 
-        effect(() => {
-          console.log('count1: ', count.value)
-          console.log('count2: ', count.value)
-        })
+      effect(() => {
+        console.log('count1: ', count.value)
+        console.log('count2: ', count.value)
+      })
 
-        effect(() => {
-          console.log('count3: ', count.value)
-        })
+      effect(() => {
+        console.log('count3: ', count.value)
+      })
 
-        setTimeout(() => count.value++, 1000)
+      setTimeout(() => count.value++, 1000)
     </script>
-</body>
+  </body>
 </html>
