@@ -15,7 +15,7 @@
     "dev:plugin": "pnpm build:plugin && pnpm --filter play dev",
     "dev:vue": "pnpm --filter vue dev",
     "dev:template": "pnpm --filter play dev",
-    "build:router": "pnpm --filter router build",
+    "build:router": "pnpm --filter vue-router build",
     "build:pinia": "pnpm --filter pinia build",
     "build:plugin": "pnpm --filter @vitejs/plugin-image build",
     "build:template": "pnpm --filter templates build",

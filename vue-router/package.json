@@ -13,5 +13,7 @@
   "files": [
     "dist"
   ],
-  "scripts": {}
+  "scripts": {
+    "build": "tsdown -c tsdown.config.ts"
+  }
 }
