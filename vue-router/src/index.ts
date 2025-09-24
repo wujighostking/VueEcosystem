@@ -47,7 +47,7 @@ function useHistoryStateNavigation() {
   }
 
   function repalce(to: PathType, data: Record<any, any>) {
-    const state = Object.assign({}, buildState(historyState.value.back, to, historyState.value.forward), data)
+    const state = Object.assign({}, buildState(historyState.value.back, to, historyState.value.forward, true), data)
 
     changeLocation(to, state, true)
 
