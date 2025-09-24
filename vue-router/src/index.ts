@@ -1,4 +1,5 @@
 type PathType = string | URL | null
+type State = ReturnType<typeof buildState>
 
 export function createWebHistory() {
   // eslint-disable-next-line unused-imports/no-unused-vars
@@ -26,9 +27,43 @@ function useHistoryStateNavigation() {
     window.history[repalce ? 'replaceState' : 'pushState'](state, '', to)
     historyState.value = state
   }
+
+  function push(to: PathType, data: Record<any, any>) {
+    const curretnState: State = Object.assign(
+      {},
+      historyState.value,
+      { forward: to, scroll: { left: window.pageXOffset, top: window.pageYOffset } },
+    )
+    changeLocation(curretnState.current, curretnState, true)
+
+    const state = Object.assign(
+      {},
+      buildState(currentLocation.value, to, null),
+      { position: curretnState.position + 1 },
+      data,
+    )
+    changeLocation(to, state, false)
+    currentLocation.value = to
+  }
+
+  function repalce(to: PathType, data: Record<any, any>) {
+    const state = Object.assign({}, buildState(historyState.value.back, to, historyState.value.forward), data)
+
+    changeLocation(to, state, true)
+
+    // 替换后需要将路径变为现在的路径
+    currentLocation.value = to
+  }
+
+  return {
+    location: currentLocation,
+    state: historyState,
+    push,
+    repalce,
+  }
 }
 
-function createCurrentLocation() {
+function createCurrentLocation(): PathType {
   const { pathname, search, hash } = window.location
 
   return pathname + search + hash
