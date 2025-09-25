@@ -1,8 +1,11 @@
-import type { App, Component, Plugin } from 'vue'
-import type { createWebHashHistory } from './hash'
+import type { App, Component, ComputedRef, Plugin } from 'vue'
 
+import type { createWebHashHistory } from './hash'
 import type { createWebHistory } from './history'
-import { h } from 'vue'
+
+import type { StartLocationNormalizedOption } from './utils/config'
+import { computed, h, reactive, shallowRef, unref } from 'vue'
+import { START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
 
 export interface Route {
@@ -19,10 +22,27 @@ interface RouterOptions {
 
 export function createRouter(options: RouterOptions) {
   const { routes } = options
-  createRouterMatcher(routes)
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  const matcher = createRouterMatcher(routes)
+
+  const currentRoute = shallowRef<StartLocationNormalizedOption>(START_LOCATION_NORMALIZED)
 
   const router: Plugin = {
     install(app: App) {
+      app.config.globalProperties.$router = router
+      Object.defineProperty(app.config.globalProperties, '$route', { enumerable: true, get: () => unref(currentRoute) })
+
+      const reactiveRoute: Partial<Record<keyof StartLocationNormalizedOption, ComputedRef>> = {}
+      for (const k in START_LOCATION_NORMALIZED) {
+        const key = k as keyof StartLocationNormalizedOption
+        reactiveRoute[key] = computed(() => currentRoute.value[key])
+      }
+
+      app.provide('router', router)
+      app.provide('route location', reactive(reactiveRoute))
+      // useRouter()  inject('router')
+      // useRoute()  inject('route location')
+
       app.component('RouterLink', {
         setup(props: any, { slots }: any) {
           return () => h('a', { href: props.to, style: { cursor: 'pointer' } }, slots.default?.())
