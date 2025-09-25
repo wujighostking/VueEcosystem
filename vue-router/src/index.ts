@@ -1,11 +1,11 @@
 import type { App, Component, ComputedRef, Plugin } from 'vue'
 import type { createWebHashHistory } from './hash'
-
 import type { createWebHistory } from './history'
 import type { StartLocationNormalizedOption } from './utils/config'
 
-import { computed, h, reactive, shallowRef, unref } from 'vue'
+import { computed, reactive, shallowRef, unref } from 'vue'
 import { RouterLink } from './components/router-link'
+import { RouterView } from './components/RouterView'
 import { START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
 
@@ -93,12 +93,7 @@ export function createRouter(options: RouterOptions) {
       // useRoute()  inject('route location')
 
       app.component('RouterLink', RouterLink)
-
-      app.component('RouterView', {
-        setup() {
-          return () => h('div')
-        },
-      })
+      app.component('RouterView', RouterView)
 
       if (currentRoute.value === START_LOCATION_NORMALIZED) {
         // 第一次渲染

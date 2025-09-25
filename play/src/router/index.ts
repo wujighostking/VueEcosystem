@@ -1,30 +1,35 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import About from '@/views/about/index.vue'
+import A from '@/views/home/A.vue'
+import B from '@/views/home/B.vue'
+import Home from '@/views/home/index.vue'
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/home/index.vue'),
+      component: Home,
 
       children: [
         {
           path: 'a',
           name: 'a',
-          component: () => import('@/views/home/A.vue'),
+          component: A,
         },
         {
           path: 'b',
           name: 'b',
-          component: () => import('@/views/home/B.vue'),
+          component: B,
         },
       ],
     },
     {
       path: '/about',
       name: 'about',
-      component: () => import('@/views/about/index.vue'),
+      component: About,
     },
   ],
 })
