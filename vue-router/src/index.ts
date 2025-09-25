@@ -1,15 +1,44 @@
-import type { App, Plugin } from 'vue'
+import type { App, Component, Plugin } from 'vue'
+import type { createWebHashHistory } from './hash'
 
-export { createWebHashHistory } from './hash'
-export { createWebHistory } from './history'
+import type { createWebHistory } from './history'
+import { h } from 'vue'
+import { createRouterMatcher } from './utils/matcher'
 
-// eslint-disable-next-line unused-imports/no-unused-vars
-export function createRouter(options: any) {
+export interface Route {
+  path: string
+  name?: string
+  meta?: Record<string, any>
+  component: Component | (() => Promise<Component>)
+  children?: Route[]
+}
+interface RouterOptions {
+  history: ReturnType<typeof createWebHistory> | ReturnType<typeof createWebHashHistory>
+  routes: Route[]
+}
+
+export function createRouter(options: RouterOptions) {
+  const { routes } = options
+  createRouterMatcher(routes)
+
   const router: Plugin = {
-    // eslint-disable-next-line unused-imports/no-unused-vars
     install(app: App) {
+      app.component('RouterLink', {
+        setup(props: any, { slots }: any) {
+          return () => h('a', { href: props.to, style: { cursor: 'pointer' } }, slots.default?.())
+        },
+      })
+
+      app.component('RouterView', {
+        setup() {
+          return () => h('div')
+        },
+      })
     },
   }
 
   return router
 }
+
+export { createWebHashHistory } from './hash'
+export { createWebHistory } from './history'

@@ -10,12 +10,12 @@ const router = createRouter({
 
       children: [
         {
-          path: '/a',
+          path: 'a',
           name: 'a',
           component: () => import('@/views/home/A.vue'),
         },
         {
-          path: '/b',
+          path: 'b',
           name: 'b',
           component: () => import('@/views/home/B.vue'),
         },
