@@ -1,10 +1,10 @@
 type PathType = string | URL | null
 type HistoryStateNavigation = ReturnType<typeof buildState>
 
-export function createWebHistory() {
-  const historyNavigation = useHistoryStateNavigation()
+export function createWebHistory(base = '') {
+  const historyNavigation = useHistoryStateNavigation(base)
 
-  const historyListeners = useHistoryListeners(historyNavigation.state, historyNavigation.location)
+  const historyListeners = useHistoryListeners(base, historyNavigation.state, historyNavigation.location)
 
   const routerHistory = Object.assign({}, historyNavigation, historyListeners)
 
@@ -20,10 +20,10 @@ export function createWebHistory() {
   return routerHistory
 }
 
-function useHistoryListeners(historyState: ReturnType<typeof useHistoryStateNavigation>['state'], currentLocation: ReturnType<typeof useHistoryStateNavigation>['location']) {
+function useHistoryListeners(base: string, historyState: ReturnType<typeof useHistoryStateNavigation>['state'], currentLocation: ReturnType<typeof useHistoryStateNavigation>['location']) {
   const listeners: ((to: PathType, from: PathType, options: { isBack: boolean }) => void)[] = []
   const popStatehandler = ({ state }: PopStateEvent) => {
-    const to = createCurrentLocation()
+    const to = createCurrentLocation(base)
     const from = currentLocation.value
     const fromState = historyState.value
 
@@ -52,9 +52,9 @@ function useHistoryListeners(historyState: ReturnType<typeof useHistoryStateNavi
 /**
  * @description 包含当前路径，当前路径下的状态，提供切换路径的方法: pushState, replaceState
  */
-function useHistoryStateNavigation() {
+function useHistoryStateNavigation(base: string) {
   const currentLocation = {
-    value: createCurrentLocation(),
+    value: createCurrentLocation(base),
   }
 
   const historyState = {
@@ -67,7 +67,9 @@ function useHistoryStateNavigation() {
   }
 
   function changeLocation(to: PathType, state: any, replace: boolean) {
-    window.history[replace ? 'replaceState' : 'pushState'](state, '', to)
+    const hasPos = base.includes('#')
+    const url = hasPos ? base + to : to
+    window.history[replace ? 'replaceState' : 'pushState'](state, '', url)
     historyState.value = state
   }
 
@@ -106,8 +108,13 @@ function useHistoryStateNavigation() {
   }
 }
 
-function createCurrentLocation(): PathType {
+function createCurrentLocation(base: string): PathType {
   const { pathname, search, hash } = window.location
+
+  const hasPos = base.includes('#')
+  if (hasPos) {
+    return base.slice(1) || '/'
+  }
 
   return pathname + search + hash
 }
