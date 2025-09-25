@@ -5,6 +5,7 @@ import type { createWebHistory } from './history'
 import type { StartLocationNormalizedOption } from './utils/config'
 
 import { computed, h, reactive, shallowRef, unref } from 'vue'
+import { RouterLink } from './components/router-link'
 import { START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
 
@@ -27,14 +28,30 @@ export function createRouter(options: RouterOptions) {
 
   const currentRoute = shallowRef<StartLocationNormalizedOption>(START_LOCATION_NORMALIZED)
 
+  let ready = false
+
+  function markAsReady() {
+    if (ready)
+      return
+
+    ready = true
+    routerHistory.listen((to) => {
+      const targetLocation = resolve(to as string)
+      const from = currentRoute.value
+
+      // 前进/后退采用替换模式
+      finalizeNavigation(targetLocation, from, true)
+    })
+  }
+
   function resolve(to: string | object) {
     if (typeof to === 'string') {
       return matcher.resolve({ path: to })
     }
   }
 
-  function finalizeNavigation(to: any, from: StartLocationNormalizedOption) {
-    if (from === START_LOCATION_NORMALIZED) {
+  function finalizeNavigation(to: any, from: StartLocationNormalizedOption, repalced: boolean = false) {
+    if (from === START_LOCATION_NORMALIZED || repalced) {
       routerHistory.replace(to.path, {})
     }
     else {
@@ -42,6 +59,8 @@ export function createRouter(options: RouterOptions) {
     }
 
     currentRoute.value = to
+
+    markAsReady()
   }
 
   function pushWithRedirect(to: string) {
@@ -73,11 +92,7 @@ export function createRouter(options: RouterOptions) {
       // useRouter()  inject('router')
       // useRoute()  inject('route location')
 
-      app.component('RouterLink', {
-        setup(props: any, { slots }: any) {
-          return () => h('a', { style: { cursor: 'pointer' } }, slots.default?.())
-        },
-      })
+      app.component('RouterLink', RouterLink)
 
       app.component('RouterView', {
         setup() {
