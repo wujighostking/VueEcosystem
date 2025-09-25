@@ -89,6 +89,19 @@ function clearValue() {
       </div>
     </template>
   </MyInput>
+
+  <hr>
+
+  <div>
+    <router-link to="/">
+      Home页面
+    </router-link>
+    <router-link to="/about">
+      About页面
+    </router-link>
+  </div>
+
+  <router-view />
 </template>
 
 <style scoped>

@@ -11,7 +11,8 @@
   "dependencies": {
     "element-plus": "^2.10.5",
     "pinia": "workspace:*",
-    "templates": "workspace:*"
+    "templates": "workspace:*",
+    "vue-router": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-image": "workspace:^",
