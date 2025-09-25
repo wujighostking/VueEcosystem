@@ -24,7 +24,27 @@ export function createRouterMatcher(routes: Route[]) {
 
   routes.forEach(route => addRoute(route))
 
-  return { addRoute }
+  /**
+   * @example { path: '/', matched: HomeRecord }  { path: '/a', matched: [ HomeRecord, aRecord ] }
+   */
+  function resolve(location: { path: string }) {
+    const matched = []
+
+    const path = location.path
+    let matcher = matchers.find(m => m.path === path)
+
+    while (matcher) {
+      matched.unshift(matcher.record)
+      matcher = matcher.parent
+    }
+
+    return {
+      path,
+      matched,
+    }
+  }
+
+  return { resolve, addRoute }
 }
 
 function normalizeRouteRecord(record: Route) {

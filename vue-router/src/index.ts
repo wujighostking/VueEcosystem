@@ -1,9 +1,9 @@
 import type { App, Component, ComputedRef, Plugin } from 'vue'
-
 import type { createWebHashHistory } from './hash'
-import type { createWebHistory } from './history'
 
+import type { createWebHistory } from './history'
 import type { StartLocationNormalizedOption } from './utils/config'
+
 import { computed, h, reactive, shallowRef, unref } from 'vue'
 import { START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
@@ -21,13 +21,43 @@ interface RouterOptions {
 }
 
 export function createRouter(options: RouterOptions) {
-  const { routes } = options
-  // eslint-disable-next-line unused-imports/no-unused-vars
+  const { history: routerHistory, routes } = options
+
   const matcher = createRouterMatcher(routes)
 
   const currentRoute = shallowRef<StartLocationNormalizedOption>(START_LOCATION_NORMALIZED)
 
-  const router: Plugin = {
+  function resolve(to: string | object) {
+    if (typeof to === 'string') {
+      return matcher.resolve({ path: to })
+    }
+  }
+
+  function finalizeNavigation(to: any, from: StartLocationNormalizedOption) {
+    if (from === START_LOCATION_NORMALIZED) {
+      routerHistory.replace(to.path, {})
+    }
+    else {
+      routerHistory.push(to.path, {})
+    }
+
+    currentRoute.value = to
+  }
+
+  function pushWithRedirect(to: string) {
+    const targetLocation = resolve(to)
+    const from = currentRoute.value
+
+    // 根据是不是第一次，来决定是 push 还是 replace
+    finalizeNavigation(targetLocation, from)
+  }
+
+  function push(to: string) {
+    return pushWithRedirect(to)
+  }
+
+  const router: Plugin & { push: (to: string) => void } = {
+    push,
     install(app: App) {
       app.config.globalProperties.$router = router
       Object.defineProperty(app.config.globalProperties, '$route', { enumerable: true, get: () => unref(currentRoute) })
@@ -45,7 +75,7 @@ export function createRouter(options: RouterOptions) {
 
       app.component('RouterLink', {
         setup(props: any, { slots }: any) {
-          return () => h('a', { href: props.to, style: { cursor: 'pointer' } }, slots.default?.())
+          return () => h('a', { style: { cursor: 'pointer' } }, slots.default?.())
         },
       })
 
@@ -54,6 +84,11 @@ export function createRouter(options: RouterOptions) {
           return () => h('div')
         },
       })
+
+      if (currentRoute.value === START_LOCATION_NORMALIZED) {
+        // 第一次渲染
+        push(routerHistory.location as unknown as string)
+      }
     },
   }
 
