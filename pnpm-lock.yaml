@@ -62,9 +62,6 @@ importers:
       pinia:
         specifier: workspace:*
         version: link:../pinia
-      templates:
-        specifier: workspace:*
-        version: link:../templates
       vue-router:
         specifier: workspace:*
         version: link:../vue-router
