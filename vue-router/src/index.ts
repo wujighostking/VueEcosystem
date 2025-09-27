@@ -6,6 +6,7 @@ import type { StartLocationNormalizedOption } from './utils/config'
 import { computed, reactive, shallowRef, unref } from 'vue'
 import { RouterLink } from './components/router-link'
 import { RouterView } from './components/RouterView'
+import { useCallback } from './guards'
 import { ROUTER, ROUTER_LOCATION, START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
 
@@ -20,6 +21,12 @@ interface RouterOptions {
   history: ReturnType<typeof createWebHistory> | ReturnType<typeof createWebHashHistory>
   routes: Route[]
 }
+type RouterResult = {
+  push: (to: string) => void
+  beforeEach: (handler: (to: string, from: string, next: () => void) => void) => void
+  beforeResolve: (handler: (to: string, from: string, next: () => void) => void) => void
+  afterEach: (handler: (to: string, from: string, next: () => void) => void) => void
+} & Plugin
 
 export function createRouter(options: RouterOptions) {
   const { history: routerHistory, routes } = options
@@ -28,8 +35,11 @@ export function createRouter(options: RouterOptions) {
 
   const currentRoute = shallowRef<StartLocationNormalizedOption>(START_LOCATION_NORMALIZED)
 
-  let ready = false
+  const beforeGuards = useCallback()
+  const beforeResolveGuards = useCallback()
+  const afterGuards = useCallback()
 
+  let ready = false
   function markAsReady() {
     if (ready)
       return
@@ -75,8 +85,11 @@ export function createRouter(options: RouterOptions) {
     return pushWithRedirect(to)
   }
 
-  const router: Plugin & { push: (to: string) => void } = {
+  const router: RouterResult = {
     push,
+    beforeEach: beforeGuards.add,
+    beforeResolve: beforeResolveGuards.add,
+    afterEach: afterGuards.add,
     install(app: App) {
       app.config.globalProperties.$router = router
       Object.defineProperty(app.config.globalProperties, '$route', { enumerable: true, get: () => unref(currentRoute) })

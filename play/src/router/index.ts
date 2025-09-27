@@ -25,6 +25,10 @@ const router = createRouter({
           component: B,
         },
       ],
+
+      // beforeEnter(to, from, next) {
+      //   console.log('beforeEnter', to, from)
+      // },
     },
     {
       path: '/about',
@@ -32,6 +36,21 @@ const router = createRouter({
       component: About,
     },
   ],
+})
+
+router.beforeEach((to, from) => {
+  // eslint-disable-next-line no-console
+  console.log('beforeEach', to, from)
+})
+
+router.beforeResolve((to, from) => {
+  // eslint-disable-next-line no-console
+  console.log('beforeResolve', to, from)
+})
+
+router.afterEach((to, from) => {
+  // eslint-disable-next-line no-console
+  console.log('afterEach', to, from)
 })
 
 export default router

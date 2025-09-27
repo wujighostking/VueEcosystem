@@ -1,5 +1,17 @@
 <script setup lang="ts">
+// import { beforeRouteEnter, beforeRouteUpdate, beforeRouteLeave } from 'vue-router'
 
+// beforeRouteEnter(to, from, next) {
+//   console.log('beforeRouteEnter')
+// }
+
+// beforeRouteUpdate(to, from, next) {
+//   console.log('beforeRouteUpdate')
+// }
+
+// beforeRouteLeave(to, from, next) {
+//   console.log('beforeRouteLeave')
+// }
 </script>
 
 <template>
