@@ -1,5 +1,6 @@
 import type { Component, ComponentPropsOptions } from 'vue'
 import { h, inject } from 'vue'
+import { ROUTER } from '../utils/config'
 
 export const RouterLink: Component = {
   name: 'RouterLink',
@@ -17,7 +18,7 @@ export const RouterLink: Component = {
 }
 
 function useLink(props: any) {
-  const router = inject('router') as any
+  const router = inject(ROUTER) as any
 
   function navigate() {
     router.push(props.to)

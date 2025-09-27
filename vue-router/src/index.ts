@@ -6,7 +6,7 @@ import type { StartLocationNormalizedOption } from './utils/config'
 import { computed, reactive, shallowRef, unref } from 'vue'
 import { RouterLink } from './components/router-link'
 import { RouterView } from './components/RouterView'
-import { START_LOCATION_NORMALIZED } from './utils/config'
+import { ROUTER, ROUTER_LOCATION, START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
 
 export interface Route {
@@ -87,8 +87,8 @@ export function createRouter(options: RouterOptions) {
         reactiveRoute[key] = computed(() => currentRoute.value[key])
       }
 
-      app.provide('router', router)
-      app.provide('route location', reactive(reactiveRoute))
+      app.provide(ROUTER, router)
+      app.provide(ROUTER_LOCATION, reactive(reactiveRoute))
       // useRouter()  inject('router')
       // useRoute()  inject('route location')
 

@@ -12,3 +12,7 @@ export const START_LOCATION_NORMALIZED: StartLocationNormalizedOption = {
   // params: {},
   matched: [],
 }
+
+export const ROUTER = 'router'
+export const ROUTER_LOCATION = 'route location'
+export const DEPTH = 'depth'

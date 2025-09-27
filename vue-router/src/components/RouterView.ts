@@ -1,16 +1,17 @@
 import type { Component } from 'vue'
 import type { StartLocationNormalizedOption } from '../utils/config'
 import { computed, h, inject, provide } from 'vue'
+import { DEPTH, ROUTER_LOCATION } from '../utils/config'
 
 export const RouterView: Component = {
   name: 'RouterView',
 
-  setup(props, { slots }) {
-    const depth = inject('depth', 0)
-    const injectRoute = inject('route location') as Record<keyof StartLocationNormalizedOption, any>
+  setup(_, { slots }) {
+    const depth = inject(DEPTH, 0)
+    const injectRoute = inject(ROUTER_LOCATION) as Record<keyof StartLocationNormalizedOption, any>
     const matchedRouteRef = computed(() => injectRoute.matched[depth])
 
-    provide('depth', depth + 1)
+    provide(DEPTH, depth + 1)
 
     return () => {
       const matchRoute = matchedRouteRef.value
