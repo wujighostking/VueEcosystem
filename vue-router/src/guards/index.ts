@@ -48,3 +48,38 @@ export function guardToPromise(
     return Promise.resolve(guardReturn).then(next)
   })
 }
+
+export function runGuardQueue(guards: ExtractComponentsGuards) {
+  return guards.reduce((promise, guard) => promise.then(() => guard()), Promise.resolve())
+}
+
+export function extractChangeRecords(to: Resolve, from: StartLocationNormalizedOption) {
+  const leavingRecords: Matched[] = []
+  const updatingRecords: Matched[] = []
+  const enteringRecords: Matched[] = []
+
+  const len = Math.max(from.matched.length, to.matched.length)
+
+  for (let i = 0; i < len; i++) {
+    const fromRecord = from.matched[i]
+
+    if (fromRecord) {
+      if (to.matched.find(record => record.path === fromRecord.path)) {
+        updatingRecords.push(fromRecord as Matched)
+      }
+      else {
+        leavingRecords.push(fromRecord as Matched)
+      }
+    }
+
+    const toRecord = to.matched[i]
+
+    if (toRecord) {
+      if (!from.matched.find(record => record.path === toRecord.path)) {
+        enteringRecords.push(toRecord as unknown as Matched)
+      }
+    }
+  }
+
+  return [leavingRecords, updatingRecords, enteringRecords]
+}

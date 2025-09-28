@@ -1,5 +1,5 @@
 import type { App, Component, ComputedRef, Plugin } from 'vue'
-import type { ExtractComponentsGuards, Matched, Resolve } from './guards'
+import type { Resolve } from './guards'
 import type { createWebHashHistory } from './hash'
 import type { createWebHistory } from './history'
 
@@ -7,7 +7,7 @@ import type { StartLocationNormalizedOption } from './utils/config'
 import { computed, reactive, shallowRef, unref } from 'vue'
 import { RouterLink } from './components/router-link'
 import { RouterView } from './components/RouterView'
-import { extractComponentsGuards, guardToPromise, useCallback } from './guards'
+import { extractChangeRecords, extractComponentsGuards, guardToPromise, runGuardQueue, useCallback } from './guards'
 import { ROUTER, ROUTER_LOCATION, START_LOCATION_NORMALIZED } from './utils/config'
 import { createRouterMatcher } from './utils/matcher'
 
@@ -73,37 +73,6 @@ export function createRouter(options: RouterOptions) {
     currentRoute.value = to
 
     markAsReady()
-  }
-
-  function extractChangeRecords(to: Resolve, from: StartLocationNormalizedOption) {
-    const leavingRecords: Matched[] = []
-    const updatingRecords: Matched[] = []
-    const enteringRecords: Matched[] = []
-
-    const len = Math.max(from.matched.length, to.matched.length)
-
-    for (let i = 0; i < len; i++) {
-      const fromRecord = from.matched[i]
-
-      if (fromRecord) {
-        if (to.matched.find(record => record.path === fromRecord.path)) {
-          updatingRecords.push(fromRecord as Matched)
-        }
-        else {
-          leavingRecords.push(fromRecord as Matched)
-        }
-      }
-
-      const toRecord = to.matched[i]
-
-      if (toRecord) {
-        if (!from.matched.find(record => record.path === toRecord.path)) {
-          enteringRecords.push(toRecord as unknown as Matched)
-        }
-      }
-    }
-
-    return [leavingRecords, updatingRecords, enteringRecords]
   }
 
   async function naviagte(to: Resolve, from: StartLocationNormalizedOption) {
@@ -214,10 +183,6 @@ export function createRouter(options: RouterOptions) {
   }
 
   return router
-}
-
-function runGuardQueue(guards: ExtractComponentsGuards) {
-  return guards.reduce((promise, guard) => promise.then(() => guard()), Promise.resolve())
 }
 
 export { createWebHashHistory } from './hash'
