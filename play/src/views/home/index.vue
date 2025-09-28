@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts">
 // import { beforeRouteEnter, beforeRouteUpdate, beforeRouteLeave } from 'vue-router'
 
 // beforeRouteEnter(to, from, next) {
@@ -12,6 +12,23 @@
 // beforeRouteLeave(to, from, next) {
 //   console.log('beforeRouteLeave')
 // }
+
+export default {
+  beforeRouteEnter() {
+  // eslint-disable-next-line no-console
+    console.log('beforeRouteEnter')
+  },
+
+  beforeRouteUpdate() {
+  // eslint-disable-next-line no-console
+    console.log('beforeRouteUpdate')
+  },
+
+  beforeRouteLeave() {
+  // eslint-disable-next-line no-console
+    console.log('beforeRouteLeave')
+  },
+}
 </script>
 
 <template>

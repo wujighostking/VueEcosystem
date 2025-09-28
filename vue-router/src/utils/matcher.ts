@@ -57,6 +57,7 @@ function normalizeRouteRecord(record: Route) {
     },
     parent: null,
     children: record.children || [],
+    beforeEnter: record.beforeEnter,
   }
 }
 
