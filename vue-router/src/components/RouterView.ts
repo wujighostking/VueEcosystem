@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 import type { StartLocationNormalizedOption } from '../utils/config'
-import { computed, h, inject, provide } from 'vue'
+import { computed, defineAsyncComponent, h, inject, provide } from 'vue'
 import { DEPTH, ROUTER_LOCATION } from '../utils/config'
 
 export const RouterView: Component = {
@@ -20,7 +20,15 @@ export const RouterView: Component = {
       if (!viewComponent)
         return slots.default?.()
 
+      if (isFunction(viewComponent)) {
+        return h(defineAsyncComponent(viewComponent))
+      }
+
       return h(viewComponent)
     }
   },
+}
+
+function isFunction(fn: any): fn is ((...args: any[]) => any) {
+  return typeof fn === 'function'
 }
