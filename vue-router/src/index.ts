@@ -25,6 +25,7 @@ interface RouterOptions {
 }
 export type RouterResult = {
   push: (to: string) => void
+  replace: (to: string) => void
   beforeEach: (handler: (to: string, from: string, next: () => void) => void) => void
   beforeResolve: (handler: (to: string, from: string, next: () => void) => void) => void
   afterEach: (handler: (to: string, from: string, next: () => void) => void) => void
@@ -154,8 +155,23 @@ export function createRouter(options: RouterOptions) {
     return pushWithRedirect(to)
   }
 
+  function replace(to: string) {
+    const targetLocation = resolve(to)
+    const from = currentRoute.value
+
+    naviagte(targetLocation!, from).then(() => {
+      // 根据是不是第一次，来决定是 push 还是 replace
+      return finalizeNavigation(targetLocation, from, true)
+    }).then(() => {
+      for (const guard of afterGuards.list()) {
+        guard(to, from as unknown as string, () => {})
+      }
+    })
+  }
+
   const router: RouterResult = {
     push,
+    replace,
     beforeEach: beforeGuards.add,
     beforeResolve: beforeResolveGuards.add,
     afterEach: afterGuards.add,

@@ -5,7 +5,7 @@ const router = useRouter()
 const route = useRoute()
 
 function handleClick() {
-  router.push('/home')
+  router.replace('/')
 }
 </script>
 
