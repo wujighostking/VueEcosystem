@@ -23,12 +23,14 @@ interface RouterOptions {
   history: ReturnType<typeof createWebHistory> | ReturnType<typeof createWebHashHistory>
   routes: Route[]
 }
-type RouterResult = {
+export type RouterResult = {
   push: (to: string) => void
   beforeEach: (handler: (to: string, from: string, next: () => void) => void) => void
   beforeResolve: (handler: (to: string, from: string, next: () => void) => void) => void
   afterEach: (handler: (to: string, from: string, next: () => void) => void) => void
 } & Plugin
+
+export type RouteLocation = Record<keyof StartLocationNormalizedOption, ComputedRef>
 
 export function createRouter(options: RouterOptions) {
   const { history: routerHistory, routes } = options
@@ -161,7 +163,7 @@ export function createRouter(options: RouterOptions) {
       app.config.globalProperties.$router = router
       Object.defineProperty(app.config.globalProperties, '$route', { enumerable: true, get: () => unref(currentRoute) })
 
-      const reactiveRoute: Partial<Record<keyof StartLocationNormalizedOption, ComputedRef>> = {}
+      const reactiveRoute: Partial<RouteLocation> = {}
       for (const k in START_LOCATION_NORMALIZED) {
         const key = k as keyof StartLocationNormalizedOption
         reactiveRoute[key] = computed(() => currentRoute.value[key])
@@ -187,3 +189,4 @@ export function createRouter(options: RouterOptions) {
 
 export { createWebHashHistory } from './hash'
 export { createWebHistory } from './history'
+export { useRoute, useRouter } from './hooks'
