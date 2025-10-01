@@ -1,5 +1,7 @@
 import { Mitt } from './mitt'
 
+let _mitt: Mitt
+
 export function mitt() {
-  return new Mitt()
+  return _mitt ??= new Mitt()
 }
