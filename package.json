@@ -10,11 +10,13 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
+    "dev:mitt": "pnpm --filter play dev",
     "dev:router": "pnpm --filter play dev",
     "dev:pinia": "pnpm --filter play dev",
     "dev:plugin": "pnpm build:plugin && pnpm --filter play dev",
     "dev:vue": "pnpm --filter vue dev",
     "dev:template": "pnpm --filter play dev",
+    "build:mitt": "pnpm --filter mitt build",
     "build:router": "pnpm --filter vue-router build",
     "build:pinia": "pnpm --filter pinia build",
     "build:plugin": "pnpm --filter @vitejs/plugin-image build",

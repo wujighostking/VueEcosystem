@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "element-plus": "^2.10.5",
+    "mitt": "workspace:*",
     "pinia": "workspace:*",
     "vue-router": "workspace:*"
   },

@@ -6,3 +6,4 @@ packages:
   - vue-router
   - vuex
   - templates
+  - mitt
