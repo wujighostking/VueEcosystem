@@ -12,7 +12,15 @@ export class Mitt {
   }
 
   off(name: string, handler: Callback) {
-    this.events.set(name, this.events.get(name)?.filter(cb => cb !== handler) ?? [])
+    const callbacks = this.events.get(name)?.filter(cb => cb !== handler)
+
+    if (callbacks && callbacks.length > 0) {
+      this.events.set(name, callbacks)
+
+      return
+    }
+
+    this.events.delete(name)
   }
 
   once(name: string, handler: Callback) {
@@ -27,7 +35,8 @@ export class Mitt {
     const clear = () => {
       this.events.clear()
     }
+    const size = () => this.events.size
 
-    return { clear }
+    return { clear, size }
   }
 }

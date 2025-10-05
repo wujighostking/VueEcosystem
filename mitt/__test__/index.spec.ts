@@ -38,8 +38,11 @@ describe('test mitt', () => {
     emitter.on('onEvent1', onEvent1)
     emitter.on('onEvent2', onEvent2)
 
+    expect(emitter.all.size()).toBe(2)
+
     emitter.all.clear()
 
+    expect(emitter.all.size()).toBe(0)
     expect(onEvent1).toBeCalledTimes(0)
     expect(onEvent2).toBeCalledTimes(0)
   })
