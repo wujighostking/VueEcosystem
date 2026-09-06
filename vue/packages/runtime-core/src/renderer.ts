@@ -197,8 +197,13 @@ export function createRenderer(options) {
 
   function patchKeyedChildren(c1, c2, container) {
     /**
-     * 1.双端 diff
+     * 1.双端 diff：理想数据，前后插入，前后删除
      *  1.1 头部对比
+     *  1.2 尾部对比
+     *
+     * 2.乱序对比
+     *  c1 => [a, (b, c, d), e]
+     *  c2 => [a, (c, d, b), e]
      */
 
     let i = 0
@@ -257,9 +262,47 @@ export function createRenderer(options) {
         unmount(c1[i++])
       }
     }
+    else {
+      /**
+       * 乱序对比
+       */
+      const s1 = i
+      const s2 = i
 
-    // eslint-disable-next-line no-console
-    console.log(i, e1, e2)
+      const keyToNewIndexMap = new Map()
+      for (let j = s2; j <= e2; j++) {
+        const n2 = c2[j]
+        keyToNewIndexMap.set(n2.key, j)
+      }
+
+      for (let j = s1; j <= e1; j++) {
+        const n1 = c1[j]
+        const newIndex = keyToNewIndexMap.get(n1.key)
+        const n2 = c2.find(vnode => vnode.key === n1.key)
+
+        if (newIndex != null) {
+          patch(n1, c2[newIndex], container)
+        }
+        else {
+          unmount(n1)
+        }
+      }
+
+      /**
+       * 遍历新的子元素，调整顺序
+       * 倒序插入
+       */
+      for (let j = e2; j >= s2; j--) {
+        const n2 = c2[j]
+        const anchor = c2[j + 1]?.el || null
+        if (n2.el) {
+          hostInsert(n2.el, container, anchor)
+        }
+        else {
+          patch(null, n2, container, anchor)
+        }
+      }
+    }
   }
 
   const render = (vnode, container) => {

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, render } from '../dist/index.js'
+
+  const n1 = h('div', {}, [
+    h('p', {key: 'a', style: { color: 'red' } }, 'a'),
+    h('p', {key: 'b', style: { color: 'red' } }, 'b'),
+    h('p', {key: 'c', style: { color: 'red' } }, 'c'),
+    h('p', {key: 'g', style: { color: 'red' } }, 'g'),
+    h('p', {key: 'd', style: { color: 'red' } }, 'd'),
+    h('p', {key: 'e', style: { color: 'red' } }, 'e')
+  ])
+  const n2 = h('div', {}, [
+    h('p', {key: 'a', style: { color: 'blue' } }, 'a'),
+    h('p', {key: 'd', style: { color: 'blue' } }, 'd'),
+    h('p', {key: 'c', style: { color: 'blue' } }, 'c'),
+    h('p', {key: 'b', style: { color: 'blue' } }, 'b'),
+    h('p', {key: 'e', style: { color: 'blue' } }, 'e')
+  ])
+
+  render(n1, app)
+
+  setTimeout(() => {
+    render(n2, app)
+  }, 2000)
+
+</script>
+</body>
+</html>
