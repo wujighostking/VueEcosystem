@@ -6,5 +6,16 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "index.js"]
+  "files": [
+    "dist",
+    "index.js"
+  ],
+  "scripts": {
+    "dev": "tsdown -w",
+    "build": "tsdown"
+  },
+  "dependencies": {
+    "@vue/reactivity": "workspace:*",
+    "@vue/shared": "workspace:*"
+  }
 }

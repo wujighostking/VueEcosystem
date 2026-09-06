@@ -2,6 +2,7 @@
   "name": "vue",
   "type": "module",
   "version": "1.0.0",
+  "private": true,
   "packageManager": "pnpm@10.13.0",
   "description": "",
   "author": "",
@@ -9,6 +10,11 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "dev": "tsdown -c tsdown.config.ts"
+    "dev": "turbo run dev",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "tsdown": "^0.12.9",
+    "turbo": "^2.10.12"
   }
 }
