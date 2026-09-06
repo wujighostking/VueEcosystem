@@ -1,7 +1,7 @@
 import { isArray, isString, ShapeFlags } from '@vue/shared'
 
 export function createVNode(type: any, props?: any, children = null) {
-  let shapeFlag
+  let shapeFlag = 0
 
   if (isString(type)) {
     shapeFlag = ShapeFlags.ELEMENT
@@ -35,3 +35,5 @@ export function isVNode(value: any) {
 export function isSameVNodeType(n1, n2) {
   return n1.type === n2.type && n1.key === n2.key
 }
+
+export const Text = Symbol('v-text')

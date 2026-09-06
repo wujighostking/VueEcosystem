@@ -1,6 +1,6 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { ShapeFlags } from '@vue/shared'
-import { isSameVNodeType } from './vnode'
+import { isSameVNodeType, Text } from './vnode'
 
 export function createRenderer(options) {
   const {
@@ -27,6 +27,25 @@ export function createRenderer(options) {
     hostRemove(vnode.el)
   }
 
+  function processElement(n1, n2, container, anchor) {
+    if (n1 == null) {
+      mountElement(n2, container, anchor)
+    }
+    else {
+      patchElement(n1, n2)
+    }
+  }
+  function processText(n1, n2, container, anchor) {
+    if (n1 == null) {
+      const el = hostCreateText(n2.children)
+      n2.el = el
+      hostInsert(el, container, anchor)
+    }
+    // else {
+    //
+    // }
+  }
+
   /**
    *
    * @param n1 老节点 ，如果有，则和 n2 做 diff 更新，如果没有，则直接挂载
@@ -43,11 +62,22 @@ export function createRenderer(options) {
       n1 = null
     }
 
-    if (n1 == null) {
-      mountElement(n2, container, anchor)
-    }
-    else {
-      patchElement(n1, n2)
+    /**
+     * 文本、元素、组件
+     */
+    const { shapeFlag, type } = n2
+
+    switch (type) {
+      case Text:
+        processText(n1, n2, container, anchor)
+        break
+      default:
+        if (shapeFlag & ShapeFlags.ELEMENT) {
+          processElement(n1, n2, container, anchor)
+        }
+        else if (shapeFlag & ShapeFlags.COMPONENT) {
+        //   TODO 组件
+        }
     }
   }
 
@@ -409,8 +439,8 @@ function getSequence(arr: number[]) {
 
 // 3,5,9,12,15,18
 // 1,2,3,4, 6, 7
-// eslint-disable-next-line no-console
-console.log(getSequence([10, 3, 5, 9, 12, 8, 15, 18]))
+
+// console.log(getSequence([10, 3, 5, 9, 12, 8, 15, 18]))
 
 // -1,0, -1,1, 3, 4, 4, 6, 1
 // 2, 3, 1, 5, 6, 8, 7, 9, 4
@@ -418,5 +448,5 @@ console.log(getSequence([10, 3, 5, 9, 12, 8, 15, 18]))
 
 // 2, 3, 5, 6, 7, 9
 // 0, 1, 3, 4, 6, 7
-// eslint-disable-next-line no-console
-console.log(getSequence([2, 3, 1, 5, 6, 8, 7, 9, 4]))
+
+// console.log(getSequence([2, 3, 1, 5, 6, 8, 7, 9, 4]))
