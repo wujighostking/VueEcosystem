@@ -270,23 +270,40 @@ export function createRenderer(options) {
       const s2 = i
 
       const keyToNewIndexMap = new Map()
+      const newIndexToOldIndexMap: number[] = Array.from({ length: e2 - s2 + 1 })
+      newIndexToOldIndexMap.fill(-1) //  -1 表示不需要计算
+
       for (let j = s2; j <= e2; j++) {
         const n2 = c2[j]
         keyToNewIndexMap.set(n2.key, j)
       }
 
+      let pos = -1
+      let moved = false
+
       for (let j = s1; j <= e1; j++) {
         const n1 = c1[j]
         const newIndex = keyToNewIndexMap.get(n1.key)
-        const n2 = c2.find(vnode => vnode.key === n1.key)
 
         if (newIndex != null) {
+          if (newIndex > pos) {
+            pos = newIndex
+          }
+          else {
+            moved = true
+          }
+
+          newIndexToOldIndexMap[newIndex] = j
+
           patch(n1, c2[newIndex], container)
         }
         else {
           unmount(n1)
         }
       }
+
+      const newIndexSequence = moved ? getSequence(newIndexToOldIndexMap) : []
+      const sequenceSet = new Set(newIndexSequence)
 
       /**
        * 遍历新的子元素，调整顺序
@@ -296,7 +313,12 @@ export function createRenderer(options) {
         const n2 = c2[j]
         const anchor = c2[j + 1]?.el || null
         if (n2.el) {
-          hostInsert(n2.el, container, anchor)
+          if (moved) {
+          // 如果 j 不在最长递增子序列里面
+            if (!sequenceSet.has(j)) {
+              hostInsert(n2.el, container, anchor)
+            }
+          }
         }
         else {
           patch(null, n2, container, anchor)
@@ -340,6 +362,9 @@ function getSequence(arr: number[]) {
     }
 
     const item = arr[i]
+    if (item === -1 || item === undefined || item === null)
+      continue
+
     const lastIndex = res[res.length - 1]
     if (item > arr[lastIndex]) {
       res.push(i)
