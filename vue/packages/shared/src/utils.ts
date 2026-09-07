@@ -23,3 +23,7 @@ export function isFunction(value: any) {
 export function isOnEvent(key: string) {
   return /^on[A-Z]/.test(key)
 }
+
+export function hasOwn(object, key) {
+  return Object.hasOwn(object, key)
+}

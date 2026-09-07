@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, ref } from '../dist/index.js'
+
+  const Comp = {
+    // props: ['msg']
+    props: {
+      msg: String
+    },
+    setup(props, { attrs }) {
+      console.log(props, attrs)
+      return {}
+    },
+    render() {
+      return h('div', this.count)
+    }
+  }
+
+
+  createApp(Comp, { msg: 'hello', count: 0 }).mount('#app')
+</script>
+</body>
+</html>
