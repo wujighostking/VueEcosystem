@@ -1,6 +1,6 @@
 /* eslint-disable unused-imports/no-unused-vars */
-import { ShapeFlags } from '@vue/shared'
-import { isSameVNodeType, Text } from './vnode'
+import { isNumber, isString, ShapeFlags } from '@vue/shared'
+import { createVNode, isSameVNodeType, Text } from './vnode'
 
 export function createRenderer(options) {
   const {
@@ -35,15 +35,20 @@ export function createRenderer(options) {
       patchElement(n1, n2)
     }
   }
+
   function processText(n1, n2, container, anchor) {
     if (n1 == null) {
       const el = hostCreateText(n2.children)
       n2.el = el
       hostInsert(el, container, anchor)
     }
-    // else {
-    //
-    // }
+    else {
+      n2.el = n1.el
+
+      if (n1.children !== n2.children) {
+        hostSetText(n2.el, n2.children)
+      }
+    }
   }
 
   /**
@@ -112,7 +117,7 @@ export function createRenderer(options) {
 
   function mountChildren(el, children) {
     for (let i = 0; i < children.length; i++) {
-      const child = children[i]
+      const child = children[i] = normalizeVNode(children[i])
       patch(null, child, el)
     }
   }
@@ -243,7 +248,7 @@ export function createRenderer(options) {
     // 头部对比
     while (i <= e1 && i <= e2) {
       const n1 = c1[i]
-      const n2 = c2[i]
+      const n2 = c2[i] = normalizeVNode(c2[i])
 
       if (isSameVNodeType(n1, n2)) {
         patch(n1, n2, container)
@@ -258,7 +263,7 @@ export function createRenderer(options) {
     // 尾部对比
     while (i <= e1 && i <= e2) {
       const n1 = c1[e1]
-      const n2 = c2[e2]
+      const n2 = c2[e2] = normalizeVNode(c2[i])
 
       if (isSameVNodeType(n1, n2)) {
         patch(n1, n2, container)
@@ -280,7 +285,8 @@ export function createRenderer(options) {
       const anchor = nextPos < c2.length ? c2[nextPos].el : null
 
       while (i <= e2) {
-        patch(null, c2[i++], container, anchor)
+        patch(null, c2[i] = normalizeVNode(c2[i]), container, anchor)
+        i++
       }
     }
     else if (i > e2) {
@@ -304,7 +310,7 @@ export function createRenderer(options) {
       newIndexToOldIndexMap.fill(-1) //  -1 表示不需要计算
 
       for (let j = s2; j <= e2; j++) {
-        const n2 = c2[j]
+        const n2 = c2[j] = normalizeVNode(c2[i])
         keyToNewIndexMap.set(n2.key, j)
       }
 
@@ -380,6 +386,14 @@ export function createRenderer(options) {
   return {
     render,
   }
+}
+
+export function normalizeVNode(vnode) {
+  if (isString(vnode) || isNumber(vnode)) {
+    return createVNode(Text, null, vnode)
+  }
+
+  return vnode
 }
 
 function getSequence(arr: number[]) {
