@@ -1,6 +1,7 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { isNumber, isString, ShapeFlags } from '@vue/shared'
 import { createAppAPI } from './apiCreateApp'
+import { createComponentInstance, setupComponent } from './component'
 import { createVNode, isSameVNodeType, Text } from './vnode'
 
 export function createRenderer(options) {
@@ -52,6 +53,30 @@ export function createRenderer(options) {
     }
   }
 
+  function mountComponent(vnode, container, anchor) {
+    /**
+     * 1.创建组件实例
+     * 2.初始化组件状态
+     * 3.将组件挂载到真实 dom 上
+     */
+
+    const instance = createComponentInstance(vnode)
+
+    setupComponent(instance)
+
+    const subTree = instance.render.call(instance.setupState)
+    patch(null, subTree, container, anchor)
+  }
+
+  function processComponent(n1, n2, container, anchor) {
+    if (n1 == null) {
+      mountComponent(n2, container, anchor)
+    }
+    else {
+    //   更新
+    }
+  }
+
   /**
    *
    * @param n1 老节点 ，如果有，则和 n2 做 diff 更新，如果没有，则直接挂载
@@ -82,7 +107,8 @@ export function createRenderer(options) {
           processElement(n1, n2, container, anchor)
         }
         else if (shapeFlag & ShapeFlags.COMPONENT) {
-        //   TODO 组件
+        // 组件
+          processComponent(n1, n2, container, anchor)
         }
     }
   }
