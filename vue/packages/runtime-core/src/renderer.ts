@@ -1,5 +1,6 @@
 /* eslint-disable unused-imports/no-unused-vars */
 import { isNumber, isString, ShapeFlags } from '@vue/shared'
+import { createAppAPI } from './apiCreateApp'
 import { createVNode, isSameVNodeType, Text } from './vnode'
 
 export function createRenderer(options) {
@@ -385,6 +386,7 @@ export function createRenderer(options) {
 
   return {
     render,
+    createApp: createAppAPI(render),
   }
 }
 
