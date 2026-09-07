@@ -1,4 +1,5 @@
 /* eslint-disable unused-imports/no-unused-vars */
+import { ReactiveEffect } from '@vue/reactivity'
 import { isNumber, isString, ShapeFlags } from '@vue/shared'
 import { createAppAPI } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
@@ -64,8 +65,22 @@ export function createRenderer(options) {
 
     setupComponent(instance)
 
-    const subTree = instance.render.call(instance.setupState)
-    patch(null, subTree, container, anchor)
+    function componentUpdateFn() {
+      if (!instance.isMounted) {
+        const subTree = instance.render.call(instance.setupState)
+        patch(null, subTree, container, anchor)
+        instance.subTree = subTree
+        instance.isMounted = true
+      }
+      else {
+        const preSubTree = instance.subTree
+        const subTree = instance.render.call(instance.setupState)
+        patch(preSubTree, subTree, container, anchor)
+        instance.subTree = subTree
+      }
+    }
+    const effect = new ReactiveEffect(componentUpdateFn)
+    effect.run()
   }
 
   function processComponent(n1, n2, container, anchor) {
