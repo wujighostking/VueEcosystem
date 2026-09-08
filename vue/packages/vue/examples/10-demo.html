@@ -16,15 +16,23 @@
     },
     setup(props, { attrs }) {
       console.log(props, attrs)
-      return {}
+      const count = ref(0)
+
+      return () => {
+        return h('div',{onClick: () => {count.value++}}, count.value)
+      }
+      // return () => { count }
     },
-    render() {
-      return h('div', this.count)
-    }
+    // render() {
+    //   return h('div', {
+    //     onClick: () => {
+    //       this.count++
+    //     }
+    //   }, this.count)
+    // }
   }
 
-
-  createApp(Comp, { msg: 'hello', count: 0 }).mount('#app')
+  createApp(Comp, { msg: 'hello' }).mount('#app')
 </script>
 </body>
 </html>

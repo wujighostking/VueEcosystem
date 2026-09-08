@@ -67,14 +67,14 @@ export function createRenderer(options) {
 
     function componentUpdateFn() {
       if (!instance.isMounted) {
-        const subTree = instance.render.call(instance.setupState)
+        const subTree = instance.render.call(instance.proxy)
         patch(null, subTree, container, anchor)
         instance.subTree = subTree
         instance.isMounted = true
       }
       else {
         const preSubTree = instance.subTree
-        const subTree = instance.render.call(instance.setupState)
+        const subTree = instance.render.call(instance.proxy)
         patch(preSubTree, subTree, container, anchor)
         instance.subTree = subTree
       }
