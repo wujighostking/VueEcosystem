@@ -5,6 +5,7 @@ import { createAppAPI } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
 import { updateProps } from './componentProps'
 import { shouldUpdateComponent } from './componentRenderUtils'
+import { updateSlots } from './componentSlots'
 import { queueJob } from './scheduler'
 import { createVNode, isSameVNodeType, Text } from './vnode'
 
@@ -66,7 +67,15 @@ export function createRenderer(options) {
     instance.vnode = nextVNode
     instance.next = null
 
+    /**
+     * 更新组件属性
+     */
     updateProps(instance, nextVNode)
+
+    /**
+     * 更新组件的插槽
+     */
+    updateSlots(instance, nextVNode)
   }
 
   function setupRenderEffect(instance, container, anchor) {

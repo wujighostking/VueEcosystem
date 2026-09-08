@@ -1,15 +1,36 @@
-import { isArray, isNumber, isObject, isString, ShapeFlags } from '@vue/shared'
+import { isArray, isFunction, isNumber, isObject, isString, ShapeFlags } from '@vue/shared'
 
-function normalizeChildren(children) {
-  if (isNumber(children)) {
+function normalizeChildren(vnode, children) {
+  let { shapeFlag } = vnode
+
+  if (isArray(children)) {
+    shapeFlag |= ShapeFlags.ARRAY_CHILDREN
+  }
+  else if (isObject(children)) {
+    if (shapeFlag & ShapeFlags.COMPONENT) {
+      shapeFlag |= ShapeFlags.SLOTS_CHILDREN
+    }
+  }
+  else if (isFunction(children)) {
+    /**
+     * 默认插槽
+     * children = () => h()
+     */
+    if (shapeFlag & ShapeFlags.COMPONENT) {
+      shapeFlag |= ShapeFlags.SLOTS_CHILDREN
+      children = { default: children }
+    }
+  }
+  else if (isString(children) || isNumber(children)) {
+    shapeFlag |= ShapeFlags.TEXT_CHILDREN
     children = String(children)
   }
-  return children
+
+  vnode.shapeFlag = shapeFlag
+  vnode.children = children
 }
 
 export function createVNode(type: any, props?: any, children = null) {
-  children = normalizeChildren(children)
-
   let shapeFlag = 0
 
   if (isString(type)) {
@@ -17,13 +38,6 @@ export function createVNode(type: any, props?: any, children = null) {
   }
   else if (isObject(type)) {
     shapeFlag = ShapeFlags.STATEFUL_COMPONENT
-  }
-
-  if (isString(children)) {
-    shapeFlag |= ShapeFlags.TEXT_CHILDREN
-  }
-  else if (isArray(children)) {
-    shapeFlag |= ShapeFlags.ARRAY_CHILDREN
   }
 
   const vnode = {
@@ -36,6 +50,8 @@ export function createVNode(type: any, props?: any, children = null) {
     el: null,
     shapeFlag,
   }
+
+  normalizeChildren(vnode, children)
 
   return vnode
 }

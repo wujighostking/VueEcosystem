@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, ref } from '../dist/index.js'
+
+  const Child = {
+    setup(props, { slots }) {
+      return () => {
+        return h('div', [
+          slots.header(),
+          slots.default(),
+          slots.footer({ a: 1 })
+        ])
+      }
+    }
+  }
+
+  const Comp = {
+    setup() {
+      const count = ref(0)
+
+      return () => {
+        return h('div', {},
+            [
+              h('p', '我是父组件p标签'),
+              h(Child, null, {
+                header: () => h('div', '父组件传递的插槽 header'),
+                default: () => h('div', '父组件传递的插槽 default'),
+                footer: ({ a }) => h('div', '父组件传递的插槽 footer ===> ' + a)
+              })
+            ]
+        )
+      }
+    }
+  }
+
+  createApp(Comp).mount('#app')
+</script>
+</body>
+</html>
