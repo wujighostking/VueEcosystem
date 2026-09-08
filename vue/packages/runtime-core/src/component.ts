@@ -12,7 +12,7 @@ export function createComponentInstance(vnode) {
     vnode,
     proxy: {},
     render: null,
-    setupState: null,
+    setupState: {},
     propsOptions: normalizePropsOptions(type.props),
     props: {},
     attrs: {},
@@ -85,7 +85,17 @@ function setupStatefulComponent(instance) {
   if (isFunction(type.setup)) {
     const setupContext = createSetupContext(instance)
     instance.setupContext = setupContext
+
+    // 设置当前组件实例
+    setCurrentInstance(instance)
+
+    // 执行 setup 函数
     const setupResult = type.setup(instance.props, setupContext)
+
+    /**
+     * 清楚当前组件的实例
+     */
+    unsetCurrentInstance()
 
     handleSetupResult(instance, setupResult)
 
@@ -140,4 +150,15 @@ function emit(instance, event, ...args) {
   if (isFunction(handler)) {
     handler(...args)
   }
+}
+
+let currentInstance = null
+export function getCurrentInstance() {
+  return currentInstance
+}
+export function setCurrentInstance(instance) {
+  currentInstance = instance
+}
+export function unsetCurrentInstance() {
+  setCurrentInstance(null)
 }
