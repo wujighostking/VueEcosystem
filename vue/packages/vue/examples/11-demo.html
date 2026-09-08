@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<button id="btn">count++</button>
+<script type="module">
+  import { h, createApp, ref, nextTick } from '../dist/index.js'
+
+  const Comp = {
+    // props: ['msg']
+    props: {
+      msg: String
+    },
+    setup(props, { attrs }) {
+
+      const count = ref(0)
+
+      btn.onclick = () => {
+        count.value++
+        count.value++
+        count.value++
+
+        const container = document.querySelector('#container')
+        nextTick(() => {
+          console.log(container.textContent)
+        })
+      }
+
+      return () => {
+        console.count('render')
+        return h('div', { id: 'container' }, count.value)
+      }
+    }
+
+  }
+
+  createApp(Comp, { msg: 'hello' }).mount('#app')
+</script>
+</body>
+</html>

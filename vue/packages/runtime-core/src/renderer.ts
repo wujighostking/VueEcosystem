@@ -3,6 +3,7 @@ import { ReactiveEffect } from '@vue/reactivity'
 import { isNumber, isString, ShapeFlags } from '@vue/shared'
 import { createAppAPI } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
+import { queueJob } from './scheduler'
 import { createVNode, isSameVNodeType, Text } from './vnode'
 
 export function createRenderer(options) {
@@ -54,17 +55,7 @@ export function createRenderer(options) {
     }
   }
 
-  function mountComponent(vnode, container, anchor) {
-    /**
-     * 1.创建组件实例
-     * 2.初始化组件状态
-     * 3.将组件挂载到真实 dom 上
-     */
-
-    const instance = createComponentInstance(vnode)
-
-    setupComponent(instance)
-
+  function setupRenderEffect(instance, container, anchor) {
     function componentUpdateFn() {
       if (!instance.isMounted) {
         const subTree = instance.render.call(instance.proxy)
@@ -80,7 +71,28 @@ export function createRenderer(options) {
       }
     }
     const effect = new ReactiveEffect(componentUpdateFn)
-    effect.run()
+    const update = effect.run.bind(effect)
+    instance.update = update
+
+    effect.scheduler = () => {
+      queueJob(update)
+    }
+
+    update()
+  }
+
+  function mountComponent(vnode, container, anchor) {
+    /**
+     * 1.创建组件实例
+     * 2.初始化组件状态
+     * 3.将组件挂载到真实 dom 上
+     */
+
+    const instance = createComponentInstance(vnode)
+
+    setupComponent(instance)
+
+    setupRenderEffect(instance, container, anchor)
   }
 
   function processComponent(n1, n2, container, anchor) {

@@ -1,6 +1,7 @@
 import { proxyRefs } from '@vue/reactivity'
 import { hasOwn, isFunction, isObject } from '@vue/shared'
 import { initProps, normalizePropsOptions } from './componentProps'
+import { nextTick } from './scheduler'
 
 export function createComponentInstance(vnode) {
   const { type } = vnode
@@ -19,6 +20,7 @@ export function createComponentInstance(vnode) {
     subTree: null,
     isMounted: false,
     ctx: null,
+    update: null,
   }
 
   instance.ctx = { _: instance }
@@ -30,6 +32,12 @@ const publicPropertiesMap = {
   $attrs: instance => instance.attrs,
   $slots: instance => instance.slots,
   $refs: instance => instance.refs,
+  $nextTick: (instance) => {
+    return nextTick.bind(instance)
+  },
+  $forceUpdate: (instance) => {
+    return () => instance.update()
+  },
 }
 
 const publicInstanceProxyHandlers = {
