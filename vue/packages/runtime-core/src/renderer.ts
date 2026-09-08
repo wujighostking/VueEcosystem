@@ -1,7 +1,7 @@
-/* eslint-disable unused-imports/no-unused-vars */
 import { ReactiveEffect } from '@vue/reactivity'
 import { isNumber, isString, ShapeFlags } from '@vue/shared'
 import { createAppAPI } from './apiCreateApp'
+import { LifecycleHooks, triggerHooks } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
 import { updateProps } from './componentProps'
 import { shouldUpdateComponent } from './componentRenderUtils'
@@ -17,15 +17,31 @@ export function createRenderer(options) {
     setElementText: hostSetElementText,
     createText: hostCreateText,
     setText: hostSetText,
-    parentNode: hostParentNode,
-    nextSibling: hostNextSibling,
     patchProp: hostPatchProp,
   } = options
 
-  function unmount(vnode) {
-    const { type, shapeFlag, children } = vnode
+  function unmountComponent(instance) {
+    /**
+     * 卸载前
+     */
+    triggerHooks(instance, LifecycleHooks.BEFORE_UNMOUNT)
 
-    if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
+    unmount(instance.subTree)
+
+    /**
+     * 卸载后
+     */
+    triggerHooks(instance, LifecycleHooks.UNMOUNTED)
+  }
+
+  function unmount(vnode) {
+    const { shapeFlag, children } = vnode
+
+    if (shapeFlag & ShapeFlags.COMPONENT) {
+    //   组件
+      unmountComponent(vnode.component)
+    }
+    else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       // 子节点是数组
 
       unmountChildren(children)
@@ -82,11 +98,22 @@ export function createRenderer(options) {
     function componentUpdateFn() {
       if (!instance.isMounted) {
         const { vnode, render } = instance
+
+        /**
+         * 挂在前
+         */
+        triggerHooks(instance, LifecycleHooks.BEFORE_MOUNT)
+
         const subTree = render.call(instance.proxy)
         patch(null, subTree, container, anchor)
         vnode.el = subTree.el
         instance.subTree = subTree
         instance.isMounted = true
+
+        /**
+         * 挂在后
+         */
+        triggerHooks(instance, LifecycleHooks.MOUNTED)
       }
       else {
         let { vnode, render, next } = instance
@@ -99,11 +126,21 @@ export function createRenderer(options) {
           next = vnode
         }
 
+        /**
+         * 更新前
+         */
+        triggerHooks(instance, LifecycleHooks.BEFORE_UPDATE)
+
         const preSubTree = instance.subTree
         const subTree = render.call(instance.proxy)
         patch(preSubTree, subTree, container, anchor)
         next.el = subTree.el
         instance.subTree = subTree
+
+        /**
+         * 更新后
+         */
+        triggerHooks(instance, LifecycleHooks.UPDATE)
       }
     }
     const effect = new ReactiveEffect(componentUpdateFn)

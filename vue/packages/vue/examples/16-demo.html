@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import {
+    ref, h, createApp, onBeforeMount, onMounted, onBeforeUpdate, onUpdate, onBeforeUnmount,
+    onUnmounted,getCurrentInstance
+  } from '../dist/index.js'
+
+  const Comp = {
+    setup() {
+
+      const count = ref(0)
+
+      onBeforeMount(() => {
+        console.log(1)
+      })
+      onMounted(() => {
+        console.log(getCurrentInstance())
+        console.log(2)
+      })
+      onBeforeUpdate(() => {
+        console.log(3)
+      })
+      onUpdate(() => {
+        console.log(4)
+      })
+      onBeforeUnmount(() => {
+        console.log(5)
+      })
+      onUnmounted(() => {
+        console.log(6)
+      })
+
+      setTimeout(() => {
+        count.value++
+      }, 2000)
+
+      return () => {
+        return h(
+            'div',
+            {},
+            [
+              h('p', '我是父组件p标签'),
+              count.value
+            ]
+        )
+      }
+    }
+  }
+
+  const app = createApp(Comp)
+  app.mount('#app')
+  setTimeout(() => {
+    app.unmount()
+  }, 3000)
+</script>
+</body>
+</html>
