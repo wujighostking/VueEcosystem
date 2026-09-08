@@ -29,6 +29,7 @@ export function createComponentInstance(vnode) {
 }
 
 const publicPropertiesMap = {
+  $el: instance => instance.vnode.el,
   $attrs: instance => instance.attrs,
   $slots: instance => instance.slots,
   $refs: instance => instance.refs,

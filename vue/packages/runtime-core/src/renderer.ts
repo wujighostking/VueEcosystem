@@ -3,6 +3,8 @@ import { ReactiveEffect } from '@vue/reactivity'
 import { isNumber, isString, ShapeFlags } from '@vue/shared'
 import { createAppAPI } from './apiCreateApp'
 import { createComponentInstance, setupComponent } from './component'
+import { updateProps } from './componentProps'
+import { shouldUpdateComponent } from './componentRenderUtils'
 import { queueJob } from './scheduler'
 import { createVNode, isSameVNodeType, Text } from './vnode'
 
@@ -55,18 +57,43 @@ export function createRenderer(options) {
     }
   }
 
+  function updateComponentPreRender(instance, nextVNode) {
+    /**
+     *  复用组件实例
+     *  更新 props
+     *  更新 slots
+     */
+    instance.vnode = nextVNode
+    instance.next = null
+
+    updateProps(instance, nextVNode)
+  }
+
   function setupRenderEffect(instance, container, anchor) {
     function componentUpdateFn() {
       if (!instance.isMounted) {
-        const subTree = instance.render.call(instance.proxy)
+        const { vnode, render } = instance
+        const subTree = render.call(instance.proxy)
         patch(null, subTree, container, anchor)
+        vnode.el = subTree.el
         instance.subTree = subTree
         instance.isMounted = true
       }
       else {
+        let { vnode, render, next } = instance
+        if (next) {
+          // 父组件传递的属性出发的更新
+          updateComponentPreRender(instance, next)
+        }
+        else {
+          // 自身属性触发的更新
+          next = vnode
+        }
+
         const preSubTree = instance.subTree
-        const subTree = instance.render.call(instance.proxy)
+        const subTree = render.call(instance.proxy)
         patch(preSubTree, subTree, container, anchor)
+        next.el = subTree.el
         instance.subTree = subTree
       }
     }
@@ -89,10 +116,29 @@ export function createRenderer(options) {
      */
 
     const instance = createComponentInstance(vnode)
+    vnode.component = instance
 
     setupComponent(instance)
 
     setupRenderEffect(instance, container, anchor)
+  }
+
+  function updateComponent(n1, n2) {
+    const instance = n2.component = n1.component
+
+    /**
+     * 该更新：props 或者 slots 发生了变化
+     * 不该更新：啥都没变
+     */
+
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2
+      instance.update()
+    }
+    else {
+      n2.el = n1.el
+      instance.vnode = n2
+    }
   }
 
   function processComponent(n1, n2, container, anchor) {
@@ -101,6 +147,7 @@ export function createRenderer(options) {
     }
     else {
     //   更新
+      updateComponent(n1, n2)
     }
   }
 

@@ -1,0 +1,37 @@
+import { hasChanged } from '@vue/shared'
+
+function hasPropsChanged(prevProps, nextProps) {
+  const nextKeys = Object.keys(nextProps)
+
+  if (nextKeys.length !== Object.keys(prevProps).length) {
+    return true
+  }
+
+  for (const key of nextKeys) {
+    if (hasChanged(prevProps[key], nextProps[key])) {
+      return true
+    }
+  }
+}
+
+export function shouldUpdateComponent(n1, n2) {
+  const { props: prevProps, children: prevChildren } = n1
+  const { props: nextProps, children: nextChildren } = n2
+
+  if (prevChildren || nextChildren) {
+    return true
+  }
+
+  if (!prevProps) {
+    // 老的没有，新的有，需要更新
+    // 老的没有，新的没有，不需要更新
+    return !!nextProps
+  }
+
+  if (!nextProps) {
+    // 老的有，新的没有，需要更新
+    return true
+  }
+
+  return hasPropsChanged(prevProps, nextProps)
+}

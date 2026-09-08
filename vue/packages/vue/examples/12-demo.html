@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<button id="btn">count++</button>
+<script type="module">
+  import { h, createApp, ref } from '../dist/index.js'
+
+  const Child = {
+    props: [ 'count' ],
+    setup(props) {
+      return () => {
+        return  h('div', props.count)
+      }
+    }
+  }
+
+  const Comp = {
+    setup() {
+      const count = ref(0)
+
+      btn.onclick = () => {
+        count.value++
+      }
+
+      return () => {
+        return h(Child, { count: count.value })
+      }
+    }
+
+  }
+
+  createApp(Comp).mount('#app')
+</script>
+</body>
+</html>
