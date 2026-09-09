@@ -1,3 +1,4 @@
+import { setCurrentRenderingInstance, unsetCurrentInstance } from '@vue/runtime-core'
 import { hasChanged } from '@vue/shared'
 
 function hasPropsChanged(prevProps, nextProps) {
@@ -34,4 +35,12 @@ export function shouldUpdateComponent(n1, n2) {
   }
 
   return hasPropsChanged(prevProps, nextProps)
+}
+
+export function renderComponentRoot(instance) {
+  setCurrentRenderingInstance(instance)
+  const subTree = instance.render.call(instance.proxy)
+  unsetCurrentInstance()
+
+  return subTree
 }

@@ -1,4 +1,5 @@
 import { isArray, isFunction, isNumber, isObject, isString, ShapeFlags } from '@vue/shared'
+import { getCurrentRenderingInstance } from './component'
 
 function normalizeChildren(vnode, children) {
   let { shapeFlag } = vnode
@@ -30,6 +31,16 @@ function normalizeChildren(vnode, children) {
   vnode.children = children
 }
 
+function normalizeRef(ref) {
+  if (ref == null)
+    return
+
+  return {
+    r: ref,
+    i: getCurrentRenderingInstance(),
+  }
+}
+
 export function createVNode(type: any, props?: any, children = null) {
   let shapeFlag = 0
 
@@ -49,6 +60,7 @@ export function createVNode(type: any, props?: any, children = null) {
     key: props?.key,
     el: null,
     shapeFlag,
+    ref: normalizeRef(props?.ref),
   }
 
   normalizeChildren(vnode, children)

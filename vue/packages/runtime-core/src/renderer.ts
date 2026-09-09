@@ -4,8 +4,9 @@ import { createAppAPI } from './apiCreateApp'
 import { LifecycleHooks, triggerHooks } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
 import { updateProps } from './componentProps'
-import { shouldUpdateComponent } from './componentRenderUtils'
+import { renderComponentRoot, shouldUpdateComponent } from './componentRenderUtils'
 import { updateSlots } from './componentSlots'
+import { setRef } from './renderTemplateRef'
 import { queueJob } from './scheduler'
 import { createVNode, isSameVNodeType, Text } from './vnode'
 
@@ -35,7 +36,7 @@ export function createRenderer(options) {
   }
 
   function unmount(vnode) {
-    const { shapeFlag, children } = vnode
+    const { shapeFlag, children, ref } = vnode
 
     if (shapeFlag & ShapeFlags.COMPONENT) {
     //   组件
@@ -48,6 +49,10 @@ export function createRenderer(options) {
     }
 
     hostRemove(vnode.el)
+
+    if (ref != null) {
+      setRef(ref, null)
+    }
   }
 
   function processElement(n1, n2, container, anchor) {
@@ -97,14 +102,15 @@ export function createRenderer(options) {
   function setupRenderEffect(instance, container, anchor) {
     function componentUpdateFn() {
       if (!instance.isMounted) {
-        const { vnode, render } = instance
+        const { vnode } = instance
 
         /**
          * 挂在前
          */
         triggerHooks(instance, LifecycleHooks.BEFORE_MOUNT)
 
-        const subTree = render.call(instance.proxy)
+        const subTree = renderComponentRoot(instance)
+
         patch(null, subTree, container, anchor)
         vnode.el = subTree.el
         instance.subTree = subTree
@@ -116,7 +122,7 @@ export function createRenderer(options) {
         triggerHooks(instance, LifecycleHooks.MOUNTED)
       }
       else {
-        let { vnode, render, next } = instance
+        let { vnode, next } = instance
         if (next) {
           // 父组件传递的属性出发的更新
           updateComponentPreRender(instance, next)
@@ -132,7 +138,7 @@ export function createRenderer(options) {
         triggerHooks(instance, LifecycleHooks.BEFORE_UPDATE)
 
         const preSubTree = instance.subTree
-        const subTree = render.call(instance.proxy)
+        const subTree = renderComponentRoot(instance)
         patch(preSubTree, subTree, container, anchor)
         next.el = subTree.el
         instance.subTree = subTree
@@ -216,7 +222,7 @@ export function createRenderer(options) {
     /**
      * 文本、元素、组件
      */
-    const { shapeFlag, type } = n2
+    const { shapeFlag, type, ref } = n2
 
     switch (type) {
       case Text:
@@ -230,6 +236,10 @@ export function createRenderer(options) {
         // 组件
           processComponent(n1, n2, container, anchor)
         }
+    }
+
+    if (ref != null) {
+      setRef(ref, n2)
     }
   }
 
@@ -245,7 +255,9 @@ export function createRenderer(options) {
 
     if (props) {
       for (const key in props) {
-        hostPatchProp(el, key, null, props[key])
+        if (key !== 'ref') {
+          hostPatchProp(el, key, null, props[key])
+        }
       }
     }
 

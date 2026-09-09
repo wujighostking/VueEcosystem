@@ -139,6 +139,9 @@ function createSetupContext(instance) {
     },
     //   插槽
     slots: instance.slots,
+    expose(exposed) {
+      instance.exposed = exposed
+    },
   }
 }
 
@@ -161,4 +164,48 @@ export function setCurrentInstance(instance) {
 }
 export function unsetCurrentInstance() {
   setCurrentInstance(null)
+}
+
+/**
+ * 当前正在渲染的组件实例
+ */
+let currentRenderingInstance = null
+export function getCurrentRenderingInstance() {
+  return currentRenderingInstance
+}
+export function setCurrentRenderingInstance(instance) {
+  currentRenderingInstance = instance
+}
+export function unsetCurrentRenderingInstance() {
+  setCurrentRenderingInstance(null)
+}
+
+/**
+ * 获取到实例公开的属性
+ * @param instance
+ */
+export function getComponentPublicInstance(instance) {
+  if (instance.exposed) {
+    if (instance.exposedProxy) {
+      return instance.exposedProxy
+    }
+
+    instance.exposedProxy = new Proxy(instance.exposed, {
+      get(target, key) {
+        if (key in target) {
+          return target[key]
+        }
+
+        if (key in publicPropertiesMap) {
+          // $el $props $attrs
+          return publicPropertiesMap[key](instance)
+        }
+      },
+    })
+
+    return instance.exposedProxy
+  }
+  else {
+    return instance.proxy
+  }
 }

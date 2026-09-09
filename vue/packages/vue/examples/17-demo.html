@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import {
+    ref, h, createApp, onBeforeMount, onMounted, onBeforeUpdate, onUpdate, onBeforeUnmount,
+    onUnmounted, getCurrentInstance,useTemplateRef
+  } from '../dist/index.js'
+
+  const Child = {
+    setup(props, { expose }) {
+      expose({
+        a: ref(10),
+        foo: () => {
+          console.log('这是子组件暴露的方法')
+        }
+      })
+      return () => {
+        return h('div', { id: 'child' }, '我是子组件')
+      }
+    }
+  }
+
+  const Comp = {
+    setup() {
+      const count = ref(0)
+      const elRef = ref()
+      const childRef = ref()
+      const _childRef = useTemplateRef('child')
+      const vm = getCurrentInstance()
+
+      onMounted(() => {
+        // childRef.value.foo()
+        // console.log(childRef.value.a)
+        // console.log(vm.proxy.$refs.childRef.a)
+        console.log(_childRef.value)
+      })
+
+      return () => {
+        return h(
+            'div',
+            { ref: elRef },
+            [
+              h('p', '我是父组件p标签'),
+              h(Child, { ref: 'child' }),
+              count.value
+            ]
+        )
+      }
+    }
+  }
+
+  const app = createApp(Comp)
+  app.mount('#app')
+</script>
+</body>
+</html>
