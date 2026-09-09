@@ -43,6 +43,9 @@ export function createRenderer(options) {
     //   组件
       unmountComponent(vnode.component)
     }
+    else if (shapeFlag & ShapeFlags.TELEPORT) {
+      unmountChildren(children)
+    }
     else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       // 子节点是数组
 
@@ -238,6 +241,13 @@ export function createRenderer(options) {
         // 组件
           processComponent(n1, n2, container, anchor, parentComponent)
         }
+        else if (shapeFlag & ShapeFlags.TELEPORT) {
+          type.process(n1, n2, container, anchor, parentComponent, {
+            mountChildren,
+            patchChildren,
+            options,
+          })
+        }
     }
 
     if (ref != null) {
@@ -298,10 +308,10 @@ export function createRenderer(options) {
     patchProps(el, oldProps, newProps)
 
     // 更新子节点 children
-    patchChildren(n1, n2, parentComponent)
+    patchChildren(n1, n2, el, parentComponent)
   }
 
-  function patchChildren(n1, n2, parentComponent) {
+  function patchChildren(n1, n2, el, parentComponent) {
     /**
      * 1.新节点的子节点是文本
      *  1.2 老的是数组
@@ -311,7 +321,6 @@ export function createRenderer(options) {
      *  2.2 老的是数组
      */
 
-    const el = n2.el
     const prevShapeFlag = n1.shapeFlag
     const shapeFlag = n2.shapeFlag
 

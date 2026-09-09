@@ -1,5 +1,6 @@
 import { isArray, isFunction, isNumber, isObject, isString, ShapeFlags } from '@vue/shared'
 import { getCurrentRenderingInstance } from './component'
+import { isTeleport } from './components/Teleport'
 
 function normalizeChildren(vnode, children) {
   let { shapeFlag } = vnode
@@ -46,6 +47,9 @@ export function createVNode(type: any, props?: any, children = null) {
 
   if (isString(type)) {
     shapeFlag = ShapeFlags.ELEMENT
+  }
+  else if (isTeleport(type)) {
+    shapeFlag = ShapeFlags.TELEPORT
   }
   else if (isObject(type)) {
     shapeFlag = ShapeFlags.STATEFUL_COMPONENT

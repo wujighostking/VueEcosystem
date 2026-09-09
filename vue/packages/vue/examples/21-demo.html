@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, getCurrentInstance, ref, provide, inject, Teleport } from '../dist/index.js'
+
+  const App = {
+    setup() {
+      const list = ref([0,1])
+
+      const to = ref('body')
+      const disabled = ref(true)
+
+      // setTimeout(() => {
+      //   list.value.push(3)
+      //   to.value = '#container'
+      // }, 2000)
+
+      setTimeout(() => {
+        disabled.value = !disabled.value
+      }, 2000)
+
+
+      return () => h('div', {id: 'container'},
+          [
+            h('p', '我是p标签'),
+            h(Teleport, { to: to.value, disabled: disabled.value }, list.value.map(item => h('div', item)))
+          ]
+      )
+    }
+  }
+
+  const app = createApp(App)
+  app.mount('#app')
+</script>
+</body>
+</html>
