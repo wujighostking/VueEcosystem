@@ -4,12 +4,15 @@ import { initProps, normalizePropsOptions } from './componentProps'
 import { initSlots } from './componentSlots'
 import { nextTick } from './scheduler'
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
   const { type } = vnode
+  const appContext = parent ? parent.appContext : vnode.appContext
 
   const instance = {
     type,
     vnode,
+    parent,
+    appContext,
     proxy: {},
     render: null,
     setupState: {},

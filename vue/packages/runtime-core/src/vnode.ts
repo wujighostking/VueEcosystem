@@ -61,6 +61,7 @@ export function createVNode(type: any, props?: any, children = null) {
     el: null,
     shapeFlag,
     ref: normalizeRef(props?.ref),
+    appContext: null,
   }
 
   normalizeChildren(vnode, children)
