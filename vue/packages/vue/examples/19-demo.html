@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, getCurrentInstance, ref, provide, inject } from '../dist/index.js'
+
+  const Child = {
+    setup() {
+      const count = inject('a', 6)
+      console.log(count)
+
+      return () => {
+        return h('div', [ '我是子组件', count.value ])
+      }
+    }
+  }
+
+  const App = {
+    name: 'App',
+    setup() {
+      const count = ref(0)
+      provide('a', count)
+      setInterval(() => {
+        count.value++
+      }, 1000)
+      return () => {
+        return h('div', [ h('p', '我是父组件p标签'), h(Child) ])
+      }
+    }
+  }
+
+  const app = createApp(App)
+  app.mount('#app')
+</script>
+</body>
+</html>

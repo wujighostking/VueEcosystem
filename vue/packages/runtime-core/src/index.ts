@@ -1,5 +1,6 @@
 export * from './apiCreateApp'
 
+export * from './apiInject'
 export * from './apiLifecycle'
 export * from './component'
 export * from './h'

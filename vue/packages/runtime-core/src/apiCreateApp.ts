@@ -7,6 +7,7 @@ export function createAppAPI(render) {
     }
 
     const app = {
+      context,
       _container: null,
 
       mount(container) {
@@ -18,6 +19,9 @@ export function createAppAPI(render) {
 
       unmount() {
         render(null, app._container)
+      },
+      provide(key, value) {
+        context.provides[key] = value
       },
     }
 

@@ -26,6 +26,7 @@ export function createComponentInstance(vnode, parent) {
     ctx: null,
     update: null,
     emit: null,
+    provides: parent?.provides || appContext.provides,
   }
 
   instance.ctx = { _: instance }
