@@ -1,5 +1,5 @@
 import { setCurrentRenderingInstance, unsetCurrentInstance } from '@vue/runtime-core'
-import { hasChanged } from '@vue/shared'
+import { hasChanged, ShapeFlags } from '@vue/shared'
 
 function hasPropsChanged(prevProps, nextProps) {
   const nextKeys = Object.keys(nextProps)
@@ -38,9 +38,27 @@ export function shouldUpdateComponent(n1, n2) {
 }
 
 export function renderComponentRoot(instance) {
-  setCurrentRenderingInstance(instance)
-  const subTree = instance.render.call(instance.proxy)
-  unsetCurrentInstance()
+  const { vnode } = instance
 
-  return subTree
+  if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+    setCurrentRenderingInstance(instance)
+    const subTree = instance.render.call(instance.proxy)
+    unsetCurrentInstance()
+
+    return subTree
+  }
+  else {
+  //   函数式组件
+    return vnode.type(instance.props, {
+      get attrs() {
+        return instance.attrs
+      },
+      get slots() {
+        return instance.slots
+      },
+      get emit() {
+        return instance.emit
+      },
+    })
+  }
 }

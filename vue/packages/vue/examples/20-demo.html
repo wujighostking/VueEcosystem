@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, getCurrentInstance, ref, provide, inject } from '../dist/index.js'
+
+  function App(props, { emit }) {
+    setTimeout(() => {
+      emit('foo')
+    }, 1000)
+
+    return h('div', {}, [ h('p', props.msg) ])
+  }
+
+  App.props = [ 'msg' ]
+
+  const app = createApp(App, { count: 6, msg: 'hello world', onFoo: () => console.log('2222') })
+  app.mount('#app')
+</script>
+</body>
+</html>

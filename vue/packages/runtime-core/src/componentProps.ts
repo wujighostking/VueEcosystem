@@ -1,5 +1,5 @@
 import { reactive } from '@vue/reactivity'
-import { hasOwn, isArray } from '@vue/shared'
+import { hasOwn, isArray, ShapeFlags } from '@vue/shared'
 
 export function normalizePropsOptions(props = {}) {
   /**
@@ -30,11 +30,14 @@ export function initProps(instance) {
 }
 
 function setFullProps(instance, rawProps, props, attrs) {
-  const propsOptions = instance.propsOptions
+  const { propsOptions, vnode } = instance
+  const isFunctionalComponent = vnode.shapeFlag & ShapeFlags.FUNCTIONAL_COMPONENT
+  const hasProps = Object.keys(propsOptions).length > 0
+
   if (rawProps) {
     for (const key in rawProps) {
       const value = rawProps[key]
-      if (hasOwn(propsOptions, key)) {
+      if (hasOwn(propsOptions, key) || (isFunctionalComponent && !hasProps)) {
         props[key] = value
       }
       else {

@@ -50,6 +50,10 @@ export function createVNode(type: any, props?: any, children = null) {
   else if (isObject(type)) {
     shapeFlag = ShapeFlags.STATEFUL_COMPONENT
   }
+  else if (isFunction(type)) {
+  //   函数式组件
+    shapeFlag = ShapeFlags.FUNCTIONAL_COMPONENT
+  }
 
   const vnode = {
     __v_isVNode: true,
