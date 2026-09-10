@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, defineAsyncComponent } from '../dist/index.js'
+
+  const App = {
+    setup() {
+      const component = defineAsyncComponent({
+
+        loader: () => new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              render() {
+                return h('div', 'async component')
+              }
+            })
+          }, 2000)
+        }),
+
+        loadingComponent: () => h('div', 'loading')
+
+      })
+      return () => {
+        return h(component)
+      }
+    }
+  }
+
+  const app = createApp(App)
+  app.mount('#app')
+</script>
+</body>
+</html>

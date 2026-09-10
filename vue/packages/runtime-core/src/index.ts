@@ -1,5 +1,5 @@
+export * from './apiAsyncComponent'
 export * from './apiCreateApp'
-
 export * from './apiInject'
 export * from './apiLifecycle'
 export * from './component'
