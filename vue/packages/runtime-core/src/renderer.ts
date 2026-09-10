@@ -5,6 +5,7 @@ import { LifecycleHooks, triggerHooks } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
 import { updateProps } from './componentProps'
 import { renderComponentRoot, shouldUpdateComponent } from './componentRenderUtils'
+import { isKeepAlive } from './components/KeepAlive'
 import { updateSlots } from './componentSlots'
 import { setRef } from './renderTemplateRef'
 import { queueJob } from './scheduler'
@@ -38,6 +39,12 @@ export function createRenderer(options) {
 
   function unmount(vnode) {
     const { shapeFlag, children, ref } = vnode
+
+    if (shapeFlag & ShapeFlags.COMPONENT_SHOULD_KEEP_ALIVE) {
+      const parentComponent = vnode.component.parent
+      parentComponent.ctx.deactivate(vnode)
+      return
+    }
 
     if (shapeFlag & ShapeFlags.COMPONENT) {
     //   组件
@@ -172,6 +179,10 @@ export function createRenderer(options) {
      */
 
     const instance = createComponentInstance(vnode, parentComponent)
+    if (isKeepAlive(vnode.type)) {
+      instance.ctx.renderer = { options }
+    }
+
     vnode.component = instance
 
     setupComponent(instance)
@@ -199,6 +210,10 @@ export function createRenderer(options) {
 
   function processComponent(n1, n2, container, anchor, parentComponent) {
     if (n1 == null) {
+      if (n2.shapeFlag & ShapeFlags.COMPONENT_KEPT_ALIVE) {
+        parentComponent.ctx.activate(n2, container, anchor)
+        return
+      }
       mountComponent(n2, container, anchor, parentComponent)
     }
     else {

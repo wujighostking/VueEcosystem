@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, createApp, onMounted, ref, KeepAlive, onUnmounted } from '../dist/index.js'
+
+  const Comp1 = {
+    setup() {
+      onMounted(() => {
+        console.log('Comp1 mounted')
+      })
+      onUnmounted(() => {
+        console.log('Comp1 unmounted')
+      })
+      return () => {
+        return h('div', null, [ '我是Comp1' ])
+      }
+    }
+  }
+
+  const Comp2 = {
+    setup() {
+      onMounted(() => {
+        console.log('Comp2 mounted')
+      })
+      onUnmounted(() => {
+        console.log('Comp2 unmounted')
+      })
+      return () => {
+        return h('div', [ '我是Comp2' ])
+      }
+    }
+  }
+
+  const App = {
+    setup() {
+      const count = ref(true)
+
+      return () => h('div', [
+        h('button', {
+          onClick() {
+            count.value = !count.value
+          }
+        }, '切换'),
+        h(KeepAlive, null, () => count.value ? h(Comp1) : h(Comp2))
+      ])
+    }
+  }
+
+  const app = createApp(App)
+  app.mount('#app')
+</script>
+</body>
+</html>
