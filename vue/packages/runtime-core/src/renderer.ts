@@ -180,7 +180,7 @@ export function createRenderer(options) {
 
     const instance = createComponentInstance(vnode, parentComponent)
     if (isKeepAlive(vnode.type)) {
-      instance.ctx.renderer = { options }
+      instance.ctx.renderer = { options, unmount }
     }
 
     vnode.component = instance

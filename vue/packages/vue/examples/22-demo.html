@@ -37,17 +37,34 @@
     }
   }
 
+  const Comp3 = {
+    setup() {
+      onMounted(() => {
+        console.log('Comp3 mounted')
+      })
+      onUnmounted(() => {
+        console.log('Comp3 unmounted')
+      })
+      return () => {
+        return h('div', [ '我是Comp3' ])
+      }
+    }
+  }
+  const components = [Comp1, Comp2, Comp3]
+
   const App = {
     setup() {
-      const count = ref(true)
-
+      const index = ref(0)
       return () => h('div', [
         h('button', {
           onClick() {
-            count.value = !count.value
+            index.value++
+            if (index.value > components.length - 1) {
+              index.value = 0
+            }
           }
         }, '切换'),
-        h(KeepAlive, null, () => count.value ? h(Comp1) : h(Comp2))
+        h(KeepAlive, { max: 2 }, () => h(components[index.value]))
       ])
     }
   }
