@@ -1,5 +1,5 @@
 import { ReactiveEffect } from '@vue/reactivity'
-import { isNumber, isString, ShapeFlags } from '@vue/shared'
+import { isNumber, isString, PatchFlags, ShapeFlags } from '@vue/shared'
 import { createAppAPI } from './apiCreateApp'
 import { LifecycleHooks, triggerHooks } from './apiLifecycle'
 import { createComponentInstance, setupComponent } from './component'
@@ -53,7 +53,7 @@ export function createRenderer(options) {
     }
 
     if (shapeFlag & ShapeFlags.COMPONENT) {
-    //   组件
+      //   组件
       unmountComponent(vnode.component)
     }
     else if (shapeFlag & ShapeFlags.TELEPORT) {
@@ -170,6 +170,7 @@ export function createRenderer(options) {
         triggerHooks(instance, LifecycleHooks.UPDATE)
       }
     }
+
     const effect = new ReactiveEffect(componentUpdateFn)
     const update = effect.run.bind(effect)
     instance.update = update
@@ -227,18 +228,24 @@ export function createRenderer(options) {
       mountComponent(n2, container, anchor, parentComponent)
     }
     else {
-    //   更新
+      //   更新
       updateComponent(n1, n2)
     }
   }
 
   function processFragment(n1, n2, container, parentComponent) {
+    const { patchFlag, dynamicChildren } = n2
     if (n1 == null) {
-    //   挂载
+      //   挂载
       mountChildren(container, n2.children, parentComponent)
     }
     else {
-    //   更新
+      if (dynamicChildren && n1.dynamicChildren && patchFlag & PatchFlags.STABLE_FRAGMENT) {
+        patchBlockChildren(n1.dynamicChildren, dynamicChildren, container, parentComponent)
+
+        return
+      }
+
       patchChildren(n1, n2, container, parentComponent)
     }
   }
@@ -278,7 +285,7 @@ export function createRenderer(options) {
           processElement(n1, n2, container, anchor, parentComponent)
         }
         else if (shapeFlag & ShapeFlags.COMPONENT) {
-        // 组件
+          // 组件
           processComponent(n1, n2, container, anchor, parentComponent)
         }
         else if (shapeFlag & ShapeFlags.TELEPORT) {
@@ -341,14 +348,48 @@ export function createRenderer(options) {
      */
 
     const el = (n2.el = n1.el)
+
+    const { patchFlag, dynamicChildren } = n2
+
     const oldProps = n1.props
     const newProps = n2.props
 
-    // 更新 props
-    patchProps(el, oldProps, newProps)
+    if (patchFlag > 0) {
+      if (patchFlag & PatchFlags.CLASS) {
+        hostPatchProp(el, 'class', oldProps?.class, newProps?.class)
+      }
 
+      if (patchFlag & PatchFlags.STYLE) {
+        hostPatchProp(el, 'style', oldProps?.style, newProps?.style)
+      }
+
+      if (patchFlag & PatchFlags.TEXT) {
+        if (n1.children !== n2.children) {
+          hostSetElementText(el, n2.children)
+        }
+
+        return
+      }
+    }
+    else {
+    // 更新 props
+      patchProps(el, oldProps, newProps)
+    }
+
+    if (dynamicChildren && n1.dynamicChildren) {
+    //   只需要更新动态节点
+      patchBlockChildren(n1.dynamicChildren, dynamicChildren, el, parentComponent)
+    }
+    else {
     // 更新子节点 children
-    patchChildren(n1, n2, el, parentComponent)
+      patchChildren(n1, n2, el, parentComponent)
+    }
+  }
+  function patchBlockChildren(c1, c2, container, parentComponent) {
+    // 只对比当前 Block 的动态子节点
+    for (let i = 0; i < c2.length; i++) {
+      patch(c1[i], c2[i], container, null, parentComponent)
+    }
   }
 
   function patchChildren(n1, n2, el, parentComponent) {
@@ -560,7 +601,7 @@ export function createRenderer(options) {
         const anchor = c2[j + 1]?.el || null
         if (n2.el) {
           if (moved) {
-          // 如果 j 不在最长递增子序列里面
+            // 如果 j 不在最长递增子序列里面
             if (!sequenceSet.has(j)) {
               hostInsert(n2.el, container, anchor)
             }
