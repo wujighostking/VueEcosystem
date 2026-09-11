@@ -18,5 +18,6 @@ export default defineConfig({
     '../runtime-core/dist',
     '../reactivity/dist',
     '../shared/dist',
+    '../compiler-core/dist',
   ],
 })
