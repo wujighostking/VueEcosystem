@@ -86,3 +86,5 @@ export function isSameVNodeType(n1, n2) {
 }
 
 export const Text = Symbol('v-text')
+
+export const Fragment = Symbol('v-fragment')

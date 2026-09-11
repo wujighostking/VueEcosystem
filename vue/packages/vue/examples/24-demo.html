@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+  import { h, ref, createApp, Fragment } from '../dist/index.js'
+
+  const App = {
+    setup() {
+      const count = ref(0)
+      setTimeout(() => {
+        count.value++
+      }, 1000)
+      return () => {
+        return h(Fragment, null, [ h('div', '1'), h('div', count.value) ])
+      }
+    }
+  }
+
+  const app = createApp(App)
+  app.mount('#app')
+
+  setTimeout(() => {
+    app.unmount()
+  }, 2000)
+</script>
+</body>
+</html>
