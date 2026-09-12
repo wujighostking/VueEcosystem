@@ -87,6 +87,11 @@ export enum State {
   InRCDATA, // RCDATA parsing - not a real state
 }
 
+function isTagStart(str) {
+  // eslint-disable-next-line regexp/use-ignore-case
+  return /[a-zA-Z]/.test(str)
+}
+
 export class Tokenizer {
   state = State.Text
 
@@ -112,18 +117,33 @@ export class Tokenizer {
     this.buffer = input
 
     while (this.index < this.buffer.length) {
-      // eslint-disable-next-line unused-imports/no-unused-vars
       const str = this.buffer[this.index]
 
       switch (this.state) {
-        case State.Text:
-          // if (str === '<') {
-          //   this.cbs.onText(this.sectionStart, this.index)
-          //   // 切换状态
-          //   this.state = State.BeforeTagName
-          //   this.sectionStart = this.index + 1
-          // }
+        case State.Text: {
+          this.stateText(str)
           break
+        }
+
+        case State.BeforeTagName: {
+          this.stateBeforeTagName(str)
+          break
+        }
+
+        case State.InTagName: {
+          this.stateInTagName(str)
+          break
+        }
+
+        case State.BeforeAttrName: {
+          this.stateBeforeAttrName(str)
+          break
+        }
+
+        case State.InClosingTagName: {
+          this.stateInClosingTagName(str)
+          break
+        }
       }
 
       this.index++
@@ -132,10 +152,63 @@ export class Tokenizer {
     this.cleanup()
   }
 
+  stateInClosingTagName(str) {
+    if (str === '>') {
+      this.cbs.onclosetagname(this.sectionStart, this.index)
+      this.sectionStart = this.index + 1
+      this.state = State.Text
+    }
+  }
+
+  stateBeforeAttrName(str) {
+    if (str === '>') {
+    // 开始标签解析完了
+      this.cbs.onopentagend()
+      this.sectionStart = this.index + 1
+      this.state = State.Text
+    }
+  }
+
+  stateInTagName(str) {
+    if (str === '>' || str === ' ') {
+      this.cbs.onopentagname(this.sectionStart, this.index)
+      this.state = State.BeforeAttrName
+      this.sectionStart = this.index
+      this.stateBeforeAttrName(str)
+    }
+  }
+
+  stateBeforeTagName(str: string) {
+    if (isTagStart(str)) {
+    //   开始标签
+      this.state = State.InTagName
+      this.sectionStart = this.index
+    }
+    else if (str === '/') {
+      //    结束标签
+      this.state = State.InClosingTagName
+      this.sectionStart = this.index + 1
+    }
+    else {
+      this.state = State.Text
+    }
+  }
+
+  private stateText(str: string) {
+    if (str === '<') {
+      if (this.sectionStart < this.index) {
+        this.cbs.ontext(this.sectionStart, this.index)
+      }
+      // 切换状态
+      this.state = State.BeforeTagName
+      this.sectionStart = this.index + 1
+    }
+  }
+
   cleanup() {
     if (this.sectionStart < this.index) {
       if (this.state === State.Text) {
-        this.cbs.onText(this.sectionStart, this.index)
+        this.cbs.ontext(this.sectionStart, this.index)
         this.sectionStart = this.index
       }
     }
@@ -145,7 +218,7 @@ export class Tokenizer {
     return {
       column: index + 1,
       line: 1,
-      offset: 0,
+      offset: index,
     }
   }
 }
