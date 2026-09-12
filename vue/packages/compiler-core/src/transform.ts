@@ -93,6 +93,7 @@ export function createRootCodegenNode(root, ctx) {
     if (isElementNode(child)) {
       const codegenNode = child.codegenNode
       convertToBlock(codegenNode, ctx)
+      root.codegenNode = codegenNode
     }
     else {
       root.codegenNode = child
