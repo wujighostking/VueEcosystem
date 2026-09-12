@@ -92,7 +92,7 @@ function isTagStart(str) {
   return /[a-zA-Z]/.test(str)
 }
 
-function isWhitespace(str) {
+export function isWhitespace(str) {
   return str === ' ' || str === '\t' || str === '\n' || str === '\r'
 }
 
@@ -163,12 +163,28 @@ export class Tokenizer {
           this.stateInAttrValueDq(str)
           break
         }
+
+        case State.Interpolation: {
+          this.stateInterpolation(str)
+          break
+        }
       }
 
       this.index++
     }
 
     this.cleanup()
+  }
+
+  stateInterpolation(str) {
+    if (str === '}') {
+      if (this.buffer[this.index + 1] === '}') {
+        this.index++
+        this.cbs.oninterpolation(this.sectionStart, this.index)
+        this.state = State.Text
+      }
+      this.sectionStart = this.index + 1
+    }
   }
 
   stateInAttrValueDq(str) {
@@ -249,7 +265,7 @@ export class Tokenizer {
     }
   }
 
-  private stateText(str: string) {
+  stateText(str: string) {
     if (str === '<') {
       if (this.sectionStart < this.index) {
         this.cbs.ontext(this.sectionStart, this.index)
@@ -257,6 +273,16 @@ export class Tokenizer {
       // 切换状态
       this.state = State.BeforeTagName
       this.sectionStart = this.index + 1
+    }
+    else if (str === '{') {
+      if (this.buffer[this.index + 1] === '{') {
+      //   插值表达式
+        if (this.sectionStart < this.index) {
+          this.cbs.ontext(this.sectionStart, this.index)
+        }
+        this.state = State.Interpolation
+        this.sectionStart = this.index
+      }
     }
   }
 

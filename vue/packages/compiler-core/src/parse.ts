@@ -1,5 +1,5 @@
 import { NodeTypes } from './ast'
-import { Tokenizer } from './tokenizer'
+import { isWhitespace, Tokenizer } from './tokenizer'
 
 let currentInput = ''
 let currentRoot = null
@@ -66,6 +66,28 @@ const tokenizer = new Tokenizer({
       }
       currentOpenTag.props.push(currentProps)
     }
+  },
+  oninterpolation(start, end) {
+    let innerStart = start + 2
+    let innerEnd = end - 1
+
+    while (isWhitespace(currentInput[innerStart])) {
+      innerStart++
+    }
+
+    while (isWhitespace(currentInput[innerEnd - 1])) {
+      innerEnd--
+    }
+
+    addNode({
+      type: NodeTypes.INTERPOLATION,
+      loc: getLoc(start, end),
+      content: {
+        type: NodeTypes.SIMPLE_EXPRESSION,
+        content: getSlice(innerStart, innerEnd),
+        loc: getLoc(innerStart, innerEnd),
+      },
+    })
   },
 })
 
