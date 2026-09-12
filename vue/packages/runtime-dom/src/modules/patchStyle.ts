@@ -1,9 +1,16 @@
+import { isString } from '@vue/shared'
+
 export function patchStyle(el, prevValue, nextValue) {
   const style = el.style
 
   if (nextValue) {
-    for (const key in nextValue) {
-      style[key] = nextValue[key]
+    if (isString(nextValue)) {
+      el.setAttribute('style', nextValue)
+    }
+    else {
+      for (const key in nextValue) {
+        style[key] = nextValue[key]
+      }
     }
   }
 

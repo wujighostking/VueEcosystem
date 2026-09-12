@@ -1,3 +1,4 @@
+import { compile } from '@vue/compiler-core'
 import { proxyRefs } from '@vue/reactivity'
 import { hasOwn, isFunction, isObject } from '@vue/shared'
 import { initProps, normalizePropsOptions } from './componentProps'
@@ -107,8 +108,21 @@ function setupStatefulComponent(instance) {
   }
 
   if (!instance.render) {
-    instance.render = type.render
+    if (type.render) {
+      instance.render = type.render
+    }
+    else if (type.template) {
+      instance.render = compilerToFunction(type.template)
+    }
   }
+}
+
+function compilerToFunction(template) {
+  const code = compile(template)
+  // eslint-disable-next-line no-new-func
+  const fn = new Function(code)
+
+  return fn()
 }
 
 function handleSetupResult(instance, setupResult) {

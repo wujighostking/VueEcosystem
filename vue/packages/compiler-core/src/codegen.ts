@@ -102,6 +102,28 @@ function genVNodeCall(node, ctx) {
   }
 }
 
+function genInterpolation(node, ctx) {
+  genNode(node.content.content, ctx)
+}
+
+function genObjectExpression(node, ctx) {
+  const { properties } = node
+
+  ctx.push('{')
+
+  properties.forEach((prop, index) => {
+    const { key, value } = prop
+
+    ctx.push(`${key.content}: ${JSON.stringify(value.content)}`)
+
+    if (index < properties.length - 1) {
+      ctx.push(',')
+    }
+  })
+
+  ctx.push('}')
+}
+
 function genNode(node, ctx) {
   switch (node.type) {
     case NodeTypes.TEXT: {
@@ -112,6 +134,13 @@ function genNode(node, ctx) {
       genVNodeCall(node, ctx)
       break
     }
+    case NodeTypes.INTERPOLATION: {
+      genInterpolation(node, ctx)
+      break
+    }
+    case NodeTypes.JS_OBJECT_EXPRESSION:
+      genObjectExpression(node, ctx)
+      break
   }
 }
 
@@ -133,4 +162,6 @@ export function generate(ast) {
   ctx.deindent()
 
   ctx.push('}')
+
+  return ctx.code
 }

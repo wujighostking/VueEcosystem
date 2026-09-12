@@ -376,7 +376,7 @@ export function createRenderer(options) {
       patchProps(el, oldProps, newProps)
     }
 
-    if (dynamicChildren && n1.dynamicChildren) {
+    if (dynamicChildren?.length && n1.dynamicChildren) {
     //   只需要更新动态节点
       patchBlockChildren(n1.dynamicChildren, dynamicChildren, el, parentComponent)
     }
