@@ -1,7 +1,8 @@
 /* eslint-disable unused-imports/no-unused-vars,no-empty */
-import { NodeTypes } from './ast'
+import { PatchFlags } from '@vue/shared'
+import { createCallExpression, NodeTypes } from './ast'
 import { parse } from './parse'
-import { TO_DISPLAT_STRING } from './runtime-helper'
+import { CREATE_TEXT, TO_DISPLAY_STRING } from './runtime-helper'
 
 function traverseChildren(node, ctx) {
   node.children.forEach((child) => {
@@ -16,7 +17,7 @@ function traverseNode(node, ctx) {
   const exits = []
 
   nodeTransforms.forEach((cb) => {
-    const exit = cb(node)
+    const exit = cb(node, ctx)
     exit && exits.push(exit)
   })
 
@@ -28,7 +29,7 @@ function traverseNode(node, ctx) {
     }
 
     case NodeTypes.INTERPOLATION: {
-      ctx.helper(TO_DISPLAT_STRING)
+      ctx.helper(TO_DISPLAY_STRING)
       break
     }
   }
@@ -39,12 +40,69 @@ function traverseNode(node, ctx) {
   }
 }
 
+function isText(node) {
+  return node.type === NodeTypes.TEXT || node.type === NodeTypes.INTERPOLATION
+}
+
 function transformElement(node, ctx) {
   if (node.type === NodeTypes.ELEMENT) {}
 }
 
 function transformText(node, ctx) {
-  if (node.type === NodeTypes.TEXT) {}
+  if (node.type === NodeTypes.TEXT) {
+    return () => {
+      const children = node.children
+      const _children = []
+      let hasText = false
+
+      for (const child of children) {
+        hasText = true
+        const last = _children.at(-1)
+        if (last && isText(child) && (isText(last) || last.type === NodeTypes.COMPOUND_EXPRESSION)) {
+          if (last.type !== NodeTypes.COMPOUND_EXPRESSION) {
+            _children[_children.length - 1] = {
+              type: NodeTypes.COMPOUND_EXPRESSION,
+              children: [last],
+            }
+          }
+
+          _children[_children.length - 1].children.push('+', child)
+        }
+        else {
+          _children.push(child)
+        }
+      }
+
+      const l = _children.length
+      /**
+       * 只有在存在文本节点，并且 _children 的长度大于1
+       */
+      if (hasText && l > 1) {
+        for (let i = 1; i < l; i++) {
+          const child = _children[i]
+          if (isText(child) || child.type === NodeTypes.COMPOUND_EXPRESSION) {
+            const args = [child]
+
+            /**
+             * patchFlag
+             */
+
+            if (child.type !== NodeTypes.TEXT) {
+              args.push(PatchFlags.TEXT)
+            }
+
+            _children[i] = {
+              type: NodeTypes.TEXT_CALL,
+              content: child,
+              codegenNode: createCallExpression(ctx.helper(CREATE_TEXT), args),
+            }
+          }
+        }
+      }
+
+      node.children = _children
+    }
+  }
 }
 
 function transformExpression(node, ctx) {
@@ -62,6 +120,8 @@ function createTransformContext(root) {
     helpers: new Set(),
     helper(name) {
       ctx.helpers.add(name)
+
+      return name
     },
   }
 

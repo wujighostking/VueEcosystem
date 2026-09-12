@@ -58,3 +58,11 @@ export enum NodeTypes {
   /** JS return 语句节点，SSR 渲染函数的返回语句 */
   JS_RETURN_STATEMENT,
 }
+
+export function createCallExpression(callee, args) {
+  return {
+    type: NodeTypes.JS_CALL_EXPRESSION,
+    callee,
+    arguments: args,
+  }
+}
