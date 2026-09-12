@@ -92,6 +92,10 @@ function isTagStart(str) {
   return /[a-zA-Z]/.test(str)
 }
 
+function isWhitespace(str) {
+  return str === ' ' || str === '\t' || str === '\n' || str === '\r'
+}
+
 export class Tokenizer {
   state = State.Text
 
@@ -144,12 +148,57 @@ export class Tokenizer {
           this.stateInClosingTagName(str)
           break
         }
+
+        case State.InAttrName: {
+          this.stateInAttrName(str)
+          break
+        }
+
+        case State.AfterAttrName: {
+          this.stateAfterAttrName(str)
+          break
+        }
+
+        case State.InAttrValueDq: {
+          this.stateInAttrValueDq(str)
+          break
+        }
       }
 
       this.index++
     }
 
     this.cleanup()
+  }
+
+  stateInAttrValueDq(str) {
+    if (str === '"') {
+    //   又遇到双引号
+      this.cbs.onattrvalue(this.sectionStart, this.index)
+      this.state = State.BeforeAttrName
+      this.sectionStart = this.index
+    }
+  }
+
+  stateAfterAttrName(str) {
+    if (str === '"') {
+      // 开始解析双引号包裹的属性值
+      this.state = State.InAttrValueDq
+      this.sectionStart = this.index + 1
+    }
+  }
+
+  stateInAttrName(str) {
+    if (str === '=') {
+      this.cbs.onattrname(this.sectionStart, this.index)
+      this.state = State.AfterAttrName
+      // this.sectionStart = this.index + 1
+    }
+    // else if (isWhitespace(str)) {
+    //   this.cbs.onattrname(this.sectionStart, this.index)
+    //   this.sectionStart = this.index + 1
+    //   this.state = State.AfterAttrName
+    // }
   }
 
   stateInClosingTagName(str) {
@@ -167,10 +216,16 @@ export class Tokenizer {
       this.sectionStart = this.index + 1
       this.state = State.Text
     }
+    else if (!isWhitespace(str)) {
+    //   开始解析属性
+      this.state = State.InAttrName
+      this.sectionStart = this.index
+      this.stateInAttrName(str)
+    }
   }
 
   stateInTagName(str) {
-    if (str === '>' || str === ' ') {
+    if (str === '>' || isWhitespace(str)) {
       this.cbs.onopentagname(this.sectionStart, this.index)
       this.state = State.BeforeAttrName
       this.sectionStart = this.index

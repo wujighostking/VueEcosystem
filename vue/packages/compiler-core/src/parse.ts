@@ -4,6 +4,7 @@ import { Tokenizer } from './tokenizer'
 let currentInput = ''
 let currentRoot = null
 let currentOpenTag
+let currentProps
 
 const stack = []
 function addNode(node) {
@@ -45,6 +46,25 @@ const tokenizer = new Tokenizer({
     else {
     // 标签写错了
       console.error('tag name error')
+    }
+  },
+  onattrname(start, end) {
+    currentProps = {
+      name: getSlice(start, end),
+      loc: getLoc(start, end),
+      value: undefined,
+    }
+  },
+  onattrvalue(start, end) {
+    const value = getSlice(start, end)
+    currentProps.value = value
+    setLocEnd(currentProps.loc, end + 1)
+
+    if (currentOpenTag) {
+      if (!currentOpenTag.propw) {
+        currentOpenTag.props = []
+      }
+      currentOpenTag.props.push(currentProps)
     }
   },
 })
