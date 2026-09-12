@@ -2,9 +2,16 @@ import { NodeTypes } from './ast'
 import { isWhitespace, Tokenizer } from './tokenizer'
 
 let currentInput = ''
-let currentRoot = null
+let currentRoot
 let currentOpenTag
 let currentProps
+
+function reset() {
+  currentInput = ''
+  currentRoot = undefined
+  currentOpenTag = undefined
+  currentProps = undefined
+}
 
 const stack = []
 function addNode(node) {
@@ -36,7 +43,7 @@ const tokenizer = new Tokenizer({
     stack.push(currentOpenTag)
     currentOpenTag = null
   },
-  onclosetagname(start, end) {
+  onclosetag(start, end) {
     const name = getSlice(start, end)
     const lastNode = stack.pop()
 
@@ -47,6 +54,8 @@ const tokenizer = new Tokenizer({
     // 标签写错了
       console.error('tag name error')
     }
+
+    lastNode.children = condenseWhitespace(lastNode.children)
   },
   onattrname(start, end) {
     currentProps = {
@@ -91,6 +100,34 @@ const tokenizer = new Tokenizer({
   },
 })
 
+function isAllWhitespace(str) {
+  for (let i = 0; i < str.length; i++) {
+    if (!isWhitespace(str[i])) {
+      return false
+    }
+  }
+  return true
+}
+
+function condenseWhitespace(children) {
+  const _children = [...children]
+  for (let i = 0; i < _children.length; i++) {
+    const node = _children[i]
+    if (node.type === NodeTypes.TEXT) {
+      if (isAllWhitespace(node.content)) {
+        if (i === 0 || i === _children.length - 1) {
+          _children[i] = null
+        }
+        else {
+          node.content = ' '
+        }
+      }
+    }
+  }
+
+  return _children.filter(Boolean)
+}
+
 function setLocEnd(loc, end) {
   loc.source = getSlice(loc.start.offset, end)
   loc.end = tokenizer.getPos(end)
@@ -117,6 +154,7 @@ function createRoot(source) {
 }
 
 export function parse(input) {
+  reset()
   currentInput = input
   const root = createRoot(input)
   currentRoot = root
@@ -125,6 +163,7 @@ export function parse(input) {
    */
 
   tokenizer.parse(input)
+  root.children = condenseWhitespace(root.children)
 
   return root
 }

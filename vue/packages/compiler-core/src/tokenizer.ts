@@ -114,6 +114,8 @@ export class Tokenizer {
    */
   buffer = ''
 
+  newLines = []
+
   constructor(private cbs) {
   }
 
@@ -122,6 +124,10 @@ export class Tokenizer {
 
     while (this.index < this.buffer.length) {
       const str = this.buffer[this.index]
+
+      if (str === '\n') {
+        this.newLines.push(this.index)
+      }
 
       switch (this.state) {
         case State.Text: {
@@ -219,7 +225,7 @@ export class Tokenizer {
 
   stateInClosingTagName(str) {
     if (str === '>') {
-      this.cbs.onclosetagname(this.sectionStart, this.index)
+      this.cbs.onclosetag(this.sectionStart, this.index)
       this.sectionStart = this.index + 1
       this.state = State.Text
     }
@@ -296,9 +302,21 @@ export class Tokenizer {
   }
 
   getPos(index) {
+    let column = index + 1
+    let line = 1
+
+    for (let i = this.newLines.length - 1; i >= 0; i--) {
+      const newLineIndex = this.newLines[i]
+      if (index > newLineIndex) {
+        line = i + 2
+        column = index - newLineIndex
+        break
+      }
+    }
+
     return {
-      column: index + 1,
-      line: 1,
+      column,
+      line,
       offset: index,
     }
   }
