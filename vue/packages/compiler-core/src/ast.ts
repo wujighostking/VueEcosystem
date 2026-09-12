@@ -1,3 +1,5 @@
+import { CREATE_ELEMENT_BLOCK, CREATE_VNODE, OPEN_BLOCK } from './runtime-helper'
+
 export enum NodeTypes {
   /** 根节点，整个模板 AST 的入口，children 为模板顶层节点列表 */
   ROOT,
@@ -98,4 +100,15 @@ export function createObjectExpression(properties) {
     type: NodeTypes.JS_OBJECT_EXPRESSION,
     properties,
   }
+}
+
+export function convertToBlock(node, ctx) {
+  /**
+   * codegenNode 加一个块标识
+   */
+  node.isBlock = true
+  ctx.helper(OPEN_BLOCK)
+  ctx.helper(CREATE_ELEMENT_BLOCK)
+  //   删除 createElementVNode
+  ctx.removeHelper(CREATE_VNODE)
 }

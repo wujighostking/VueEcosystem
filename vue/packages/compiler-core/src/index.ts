@@ -1,7 +1,2 @@
 export * from './compile'
 export * from './parse'
-export { transformText } from '@vue/compiler-core'
-export { isText } from '@vue/compiler-core'
-export { buildProps } from '@vue/compiler-core'
-export { transformElement } from '@vue/compiler-core'
-export { transformExpression } from '@vue/compiler-core'
